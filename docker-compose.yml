@@ -1,0 +1,117 @@
+name: elimbar
+
+# Один монолит, один compose. Всё поднимается одной командой на VPS в КР —
+# без микросервисов и без внешних управляемых БД (данные бенефициаров не
+# покидают юрисдикцию, включая резервные копии — см. ARCHITECTURE.md §10).
+
+x-app-env: &app-env
+  env_file: [.env]
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    <<: *app-env
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks: [elimbar]
+
+  horizon:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    <<: *app-env
+    command: php artisan horizon
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks: [elimbar]
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    <<: *app-env
+    # Драйвит лестницу ретраев рекуррента (1/3/7 дней) и ежедневную садаку.
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [elimbar]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-elimbar}
+      POSTGRES_USER: ${DB_USERNAME:-elimbar_owner}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-elimbar_owner} -d ${DB_DATABASE:-elimbar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [elimbar]
+    # Порт наружу не публикуется по умолчанию — доступ только из сети compose.
+    # Раскомментировать на время локальной отладки:
+    # ports: ["127.0.0.1:5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    networks: [elimbar]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [elimbar]
+    # Консоль MinIO (9001) не публикуется наружу — только через caddy/VPN
+    # при необходимости.
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+    networks: [elimbar]
+
+networks:
+  elimbar:
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  caddy_data:
+  caddy_config:

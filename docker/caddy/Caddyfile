@@ -1,0 +1,19 @@
+{$APP_DOMAIN:localhost} {
+	root * /var/www/html/public
+	encode gzip
+
+	php_fastcgi app:9000
+	file_server
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# TLS терминируется здесь, внутри периметра КР — никакого внешнего
+	# CDN/прокси перед Caddy (ARCHITECTURE.md §10, открытый вопрос #3 —
+	# трансграничная передача). Caddy сам оформляет сертификат через
+	# ACME, если APP_DOMAIN — реальный домен с публичным DNS.
+}
