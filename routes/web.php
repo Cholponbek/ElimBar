@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\CaseController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Контур A (донор). Контур B живёт под /admin (Filament, зарегистрирован
+// отдельным panel-провайдером, не здесь).
+Route::get('/', [CaseController::class, 'index'])->name('cases.index');
+Route::get('/cases/{case}', [CaseController::class, 'show'])->name('cases.show');

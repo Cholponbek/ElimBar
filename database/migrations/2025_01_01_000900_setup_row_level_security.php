@@ -94,14 +94,15 @@ return new class extends Migration
 
         // Публичная проекция cases: без beneficiary_id, без приватных полей.
         //
-        // security_invoker=true (PG15+) — обязательно. Без него view
-        // выполняется с правами владельца (обычно суперюзер миграций),
-        // а суперюзер по умолчанию BYPASSRLS — то есть RLS-политика
-        // tenant_isolation на cases молча не применится и view отдаст
-        // кейсы всех тенантов. С security_invoker=true политика
-        // проверяется под ролью, которая реально сделала SELECT
-        // (app_public), плюс WHERE tenant_id=... ниже — второй, явный
-        // слой на случай, если это когда-нибудь изменится.
+        // ИСПРАВЛЕНО в 2026_08_25_180000_fix_cases_public_view_ownership:
+        // security_invoker=true ниже был ошибкой — с ним Postgres требует
+        // от app_public прав на саму таблицу cases (которых у неё нет,
+        // см. REVOKE ниже), и любой SELECT через этот view падает с
+        // "permission denied for table cases". Оставлено здесь как есть
+        // (история миграций не переписывается задним числом), актуальная
+        // версия view — в миграции-фиксе. Явный WHERE tenant_id=...
+        // ниже — часть защиты и без security_invoker: он читает
+        // переменную сессии, не зависит от прав роли.
         DB::unprepared(<<<'SQL'
             CREATE OR REPLACE VIEW cases_public
             WITH (security_invoker = true) AS

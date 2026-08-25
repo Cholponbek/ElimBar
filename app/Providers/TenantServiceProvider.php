@@ -16,8 +16,8 @@ class TenantServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->app['events']->listen(ConnectionEstablished::class, function (): void {
-            TenantContext::set((int) config('tenant.id'));
+        $this->app['events']->listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
+            TenantContext::set((int) config('tenant.id'), $event->connection);
         });
     }
 }
