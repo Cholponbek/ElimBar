@@ -4,6 +4,7 @@ use App\Models\Allocation;
 use App\Models\Donation;
 use App\Models\FundCase;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * cases_allocated_within_bounds / donations_allocated_within_amount CHECK
@@ -35,11 +36,15 @@ it('rejects an allocation that exceeds the donation amount', function () {
         'amount_minor' => 4_000_00,
     ]);
 
-    expect(fn () => Allocation::create([
+    // В savepoint: Postgres помечает всю транзакцию как aborted после любой
+    // ошибки внутри неё, даже пойманной в PHP. DB::transaction() здесь
+    // вкладывается в транзакцию RefreshDatabase как SAVEPOINT, поэтому
+    // после ожидаемого исключения тест может продолжать делать запросы.
+    expect(fn () => DB::transaction(fn () => Allocation::create([
         'donation_id' => $donation->id,
         'case_id' => $case->id,
         'amount_minor' => 7_000_00, // 4 000 + 7 000 > 10 000
-    ]))->toThrow(QueryException::class);
+    ])))->toThrow(QueryException::class);
 
     expect($donation->fresh()->allocated_minor)
         ->toBe(4_000_00, 'the rejected allocation must not partially apply');

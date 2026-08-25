@@ -5,6 +5,7 @@ use App\Models\FundCase;
 use App\Models\Proof;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * cases_disbursed_within_budget CHECK (create_cases_table) + триггер
@@ -34,14 +35,16 @@ it('rejects a disbursement that exceeds the case budget', function () {
     $proof = Proof::factory()->create();
     $staff = User::factory()->create();
 
-    expect(fn () => Disbursement::create([
+    // Savepoint, не голая транзакция: иначе Postgres помечает всю
+    // транзакцию теста как aborted и следующая проверка ниже сама упадёт.
+    expect(fn () => DB::transaction(fn () => Disbursement::create([
         'case_id' => $case->id,
         'proof_id' => $proof->id,
         'amount_minor' => 10_000_01,
         'currency' => 'KGS',
         'disbursed_by' => $staff->id,
         'disbursed_at' => now(),
-    ]))->toThrow(QueryException::class);
+    ])))->toThrow(QueryException::class);
 
     expect($case->fresh()->disbursed_minor)->toBe(0);
 });
