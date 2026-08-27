@@ -35,7 +35,11 @@ jobs:
         run: railway service --help
 
       - name: whoami (only if token secret is set)
-        if: ${{ secrets.RAILWAY_TOKEN != '' }}
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway whoami
+        run: |
+          if [ -n "$RAILWAY_API_TOKEN" ]; then
+            railway whoami
+          else
+            echo "RAILWAY_TOKEN secret not set yet, skipping whoami"
+          fi
