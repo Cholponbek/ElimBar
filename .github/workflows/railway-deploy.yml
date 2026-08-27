@@ -13,14 +13,20 @@ jobs:
       # environment — no `railway login` needed, but also no `whoami`
       # (there's no "user" in this auth mode).
       #
-      # CLI quirk discovered the hard way: `status`/`up` resolve project
-      # context straight from RAILWAY_TOKEN, but `add`/`service list`/
-      # `variable *` don't — they need an actual local `railway link`
-      # first, or they report "Project not found". `service list --json`
-      # also came back `[]` even with a service confirmed to exist via
-      # `status --json`, so service discovery below reads `status --json`
-      # instead, not `service list`.
+      # CLI quirks discovered the hard way:
+      # - `status`/`up` resolve project context straight from RAILWAY_TOKEN,
+      #   but `add`/`service list`/`variable *` don't — they need an actual
+      #   local `railway link` first, or they report "Project not found".
+      # - `service list --json` came back `[]` even with a service
+      #   confirmed to exist via `status --json` — use `status --json` for
+      #   service discovery instead.
+      # - `services.edges[0]` is NOT reliably the app service once more
+      #   than one service exists — an earlier run picked the Postgres
+      #   plugin as "the app" this way and deployed the Laravel Docker
+      #   image onto it (`railway up --service Postgres`), corrupting it.
+      #   The app service name is now hardcoded below instead of guessed.
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      APP_SERVICE: elimbar-demo
       APP_KEY: "base64:l+hJHtDNk4lV1l5RnDRbS6nM1FfKuR1ZK7j7R5vt+5k="
       DB_STAFF_PASSWORD: "325611af4e8ba0b692b44794e9659d7b"
       DB_PUBLIC_PASSWORD: "63e7cf84f718bc4a0f3634494a521461"
@@ -34,36 +40,47 @@ jobs:
         id: status0
         run: |
           railway status --json | tee /tmp/status0.json
-
           PROJECT_ID=$(jq -r '.id' /tmp/status0.json)
           ENV_ID=$(jq -r '.environments.edges[0].node.id' /tmp/status0.json)
-          APP_NAME=$(jq -r '.services.edges[0].node.name' /tmp/status0.json)
-
           echo "project_id=$PROJECT_ID" | tee -a "$GITHUB_OUTPUT"
           echo "env_id=$ENV_ID" | tee -a "$GITHUB_OUTPUT"
-          echo "app_name=$APP_NAME" | tee -a "$GITHUB_OUTPUT"
-          echo "Resolved project=$PROJECT_ID env=$ENV_ID existing service=$APP_NAME"
+          echo "All services in project right now:"
+          jq -r '.services.edges[].node.name' /tmp/status0.json
 
       - name: Link (needed by add/service/variable commands, not by up/status)
         run: |
           railway link --project "${{ steps.status0.outputs.project_id }}" --environment "${{ steps.status0.outputs.env_id }}" --json || true
 
-      - name: Deploy app service from Dockerfile into the existing service
+      - name: Clean up the mis-deployed Postgres service from the previous run
         run: |
-          railway up -y --detach --json --service "${{ steps.status0.outputs.app_name }}" | tee /tmp/up.json
+          # A prior run's service-name guess deployed the Laravel image onto
+          # the actual Postgres plugin (literally named "Postgres"). Remove
+          # that corrupted service — the real database survived under an
+          # auto-deduped name (e.g. "Postgres-QUoE", discovered below) and
+          # is untouched. This is a no-op (safe to keep re-running) once
+          # the bad service is gone.
+          railway service delete --service Postgres --yes --json || true
 
-      - name: Add Postgres plugin
+      - name: Deploy app service from Dockerfile
         run: |
-          railway add --database postgres --json | tee /tmp/add.json
+          railway up -y --detach --json --service "$APP_SERVICE" | tee /tmp/up.json
 
-      - name: Resolve postgres service name (status, not service list — see top-of-file note)
+      - name: Find or create the Postgres service
         id: names
         run: |
-          APP_NAME="${{ steps.status0.outputs.app_name }}"
           railway status --json | tee /tmp/status1.json
-          PG_NAME=$(jq -r --arg appname "$APP_NAME" '[.services.edges[].node | select(.name != $appname)][0].name // empty' /tmp/status1.json)
+          PG_NAME=$(jq -r --arg appname "$APP_SERVICE" '[.services.edges[].node | select(.name != $appname)][0].name // empty' /tmp/status1.json)
+
+          if [ -z "$PG_NAME" ]; then
+            echo "No existing Postgres-like service found, provisioning one."
+            railway add --database postgres --json | tee /tmp/add.json
+            sleep 5
+            railway status --json | tee /tmp/status2.json
+            PG_NAME=$(jq -r --arg appname "$APP_SERVICE" '[.services.edges[].node | select(.name != $appname)][0].name // empty' /tmp/status2.json)
+          fi
+
           echo "pg_name=$PG_NAME" | tee -a "$GITHUB_OUTPUT"
-          echo "Resolved app=$APP_NAME postgres=$PG_NAME"
+          echo "Resolved app=$APP_SERVICE postgres=$PG_NAME"
 
       - name: Discover Postgres connection details
         id: pg
@@ -95,7 +112,6 @@ jobs:
 
       - name: Set app environment variables
         run: |
-          APP_NAME="${{ steps.status0.outputs.app_name }}"
           set -- \
             "APP_NAME=ElimBar" \
             "APP_ENV=production" \
@@ -130,15 +146,13 @@ jobs:
           for kv in "$@"; do
             key="${kv%%=*}"
             echo "Setting $key"
-            railway variable set "$kv" --service "$APP_NAME" --skip-deploys --json >/dev/null
+            railway variable set "$kv" --service "$APP_SERVICE" --skip-deploys --json >/dev/null
           done
 
       - name: Generate public domain
         id: domain
         run: |
-          APP_NAME="${{ steps.status0.outputs.app_name }}"
-          railway domain --help || true
-          (railway domain add --service "$APP_NAME" --json || railway domain --service "$APP_NAME" --json || true) | tee /tmp/domain.json || true
+          railway domain add --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
           DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
           if [ -z "$DOMAIN" ]; then
             DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
@@ -148,19 +162,25 @@ jobs:
 
       - name: Set APP_URL and trigger real deploy
         run: |
-          APP_NAME="${{ steps.status0.outputs.app_name }}"
           DOMAIN="${{ steps.domain.outputs.domain }}"
           if [ -n "$DOMAIN" ]; then
-            railway variable set "APP_URL=https://$DOMAIN" --service "$APP_NAME" --json
-            railway variable set "APP_DOMAIN=$DOMAIN" --service "$APP_NAME" --json
+            railway variable set "APP_URL=https://$DOMAIN" --service "$APP_SERVICE" --json
+            railway variable set "APP_DOMAIN=$DOMAIN" --service "$APP_SERVICE" --json
           else
             echo "No domain resolved — check the 'Generate public domain' step output; triggering redeploy without APP_URL update."
-            railway redeploy --service "$APP_NAME" --yes --json || true
+            railway redeploy --service "$APP_SERVICE" --yes --json || true
           fi
 
-      - name: Show recent deploy logs (best-effort snapshot)
+      - name: Wait for the Docker build + boot, then snapshot logs and probe the URL
         continue-on-error: true
         run: |
-          APP_NAME="${{ steps.status0.outputs.app_name }}"
-          sleep 20
-          railway logs --service "$APP_NAME" --json --lines 200 || true
+          echo "Waiting 150s for the composer/npm Docker build and container boot..."
+          sleep 150
+          echo "--- railway logs ---"
+          railway logs --service "$APP_SERVICE" --json --lines 300 || true
+          DOMAIN="${{ steps.domain.outputs.domain }}"
+          if [ -n "$DOMAIN" ]; then
+            echo "--- curl https://$DOMAIN/ ---"
+            curl -sS -o /tmp/probe.html -w "HTTP_STATUS:%{http_code}\n" "https://$DOMAIN/" || true
+            head -c 2000 /tmp/probe.html || true
+          fi
