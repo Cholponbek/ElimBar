@@ -152,7 +152,8 @@ jobs:
       - name: Generate public domain
         id: domain
         run: |
-          railway domain add --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
+          railway domain --help || true
+          railway domain --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
           DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
           if [ -z "$DOMAIN" ]; then
             DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
