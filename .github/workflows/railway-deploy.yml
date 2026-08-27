@@ -10,15 +10,16 @@ jobs:
       # This is a PROJECT token (created inside an already-existing Railway
       # project → Settings → Tokens), not an account token. Project tokens
       # use the RAILWAY_TOKEN env var name and are scoped to one project +
-      # environment — no `railway login` / project creation needed, but
-      # also no `whoami` (there's no "user" in this auth mode).
+      # environment — no `railway login` needed, but also no `whoami`
+      # (there's no "user" in this auth mode).
       #
-      # Earlier attempts used an ACCOUNT token under RAILWAY_API_TOKEN:
-      # that satisfies `railway whoami` (identity-only check) but fails
-      # with NOT_AUTHENTICATED on `up`/`add`/`link` — those require either
-      # a real browser login or a project token. Since project tokens can
-      # only be minted for a project that already exists, the empty
-      # project had to be created once by hand in the dashboard.
+      # CLI quirk discovered the hard way: `status`/`up` resolve project
+      # context straight from RAILWAY_TOKEN, but `add`/`service list`/
+      # `variable *` don't — they need an actual local `railway link`
+      # first, or they report "Project not found". `service list --json`
+      # also came back `[]` even with a service confirmed to exist via
+      # `status --json`, so service discovery below reads `status --json`
+      # instead, not `service list`.
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       APP_KEY: "base64:l+hJHtDNk4lV1l5RnDRbS6nM1FfKuR1ZK7j7R5vt+5k="
       DB_STAFF_PASSWORD: "325611af4e8ba0b692b44794e9659d7b"
@@ -30,32 +31,37 @@ jobs:
         run: npm i -g @railway/cli
 
       - name: Project status (diagnostic — project tokens have no whoami)
+        id: status0
         run: |
-          railway status --json || true
-          railway service list --json || echo '[]'
+          railway status --json | tee /tmp/status0.json
 
-      - name: Deploy app service from Dockerfile into the existing project
-        run: |
-          railway up -y --detach --json | tee /tmp/up.json
+          PROJECT_ID=$(jq -r '.id' /tmp/status0.json)
+          ENV_ID=$(jq -r '.environments.edges[0].node.id' /tmp/status0.json)
+          APP_NAME=$(jq -r '.services.edges[0].node.name' /tmp/status0.json)
 
-      - name: List services (app only, right after first deploy)
+          echo "project_id=$PROJECT_ID" | tee -a "$GITHUB_OUTPUT"
+          echo "env_id=$ENV_ID" | tee -a "$GITHUB_OUTPUT"
+          echo "app_name=$APP_NAME" | tee -a "$GITHUB_OUTPUT"
+          echo "Resolved project=$PROJECT_ID env=$ENV_ID existing service=$APP_NAME"
+
+      - name: Link (needed by add/service/variable commands, not by up/status)
         run: |
-          railway service list --json | tee /tmp/services_before.json || echo '[]' | tee /tmp/services_before.json
+          railway link --project "${{ steps.status0.outputs.project_id }}" --environment "${{ steps.status0.outputs.env_id }}" --json || true
+
+      - name: Deploy app service from Dockerfile into the existing service
+        run: |
+          railway up -y --detach --json --service "${{ steps.status0.outputs.app_name }}" | tee /tmp/up.json
 
       - name: Add Postgres plugin
         run: |
           railway add --database postgres --json | tee /tmp/add.json
 
-      - name: List services again (app + postgres)
-        run: |
-          railway service list --json | tee /tmp/services_after.json || echo '[]' | tee /tmp/services_after.json
-
-      - name: Resolve app/postgres service names
+      - name: Resolve postgres service name (status, not service list — see top-of-file note)
         id: names
         run: |
-          APP_NAME=$(jq -r '.[0].name // empty' /tmp/services_before.json)
-          echo "app_name=$APP_NAME" | tee -a "$GITHUB_OUTPUT"
-          PG_NAME=$(jq -r --arg appname "$APP_NAME" '[.[] | select(.name != $appname)][0].name // empty' /tmp/services_after.json)
+          APP_NAME="${{ steps.status0.outputs.app_name }}"
+          railway status --json | tee /tmp/status1.json
+          PG_NAME=$(jq -r --arg appname "$APP_NAME" '[.services.edges[].node | select(.name != $appname)][0].name // empty' /tmp/status1.json)
           echo "pg_name=$PG_NAME" | tee -a "$GITHUB_OUTPUT"
           echo "Resolved app=$APP_NAME postgres=$PG_NAME"
 
@@ -89,7 +95,7 @@ jobs:
 
       - name: Set app environment variables
         run: |
-          APP_NAME="${{ steps.names.outputs.app_name }}"
+          APP_NAME="${{ steps.status0.outputs.app_name }}"
           set -- \
             "APP_NAME=ElimBar" \
             "APP_ENV=production" \
@@ -130,7 +136,7 @@ jobs:
       - name: Generate public domain
         id: domain
         run: |
-          APP_NAME="${{ steps.names.outputs.app_name }}"
+          APP_NAME="${{ steps.status0.outputs.app_name }}"
           railway domain --help || true
           (railway domain add --service "$APP_NAME" --json || railway domain --service "$APP_NAME" --json || true) | tee /tmp/domain.json || true
           DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
@@ -142,7 +148,7 @@ jobs:
 
       - name: Set APP_URL and trigger real deploy
         run: |
-          APP_NAME="${{ steps.names.outputs.app_name }}"
+          APP_NAME="${{ steps.status0.outputs.app_name }}"
           DOMAIN="${{ steps.domain.outputs.domain }}"
           if [ -n "$DOMAIN" ]; then
             railway variable set "APP_URL=https://$DOMAIN" --service "$APP_NAME" --json
@@ -155,6 +161,6 @@ jobs:
       - name: Show recent deploy logs (best-effort snapshot)
         continue-on-error: true
         run: |
-          APP_NAME="${{ steps.names.outputs.app_name }}"
+          APP_NAME="${{ steps.status0.outputs.app_name }}"
           sleep 20
           railway logs --service "$APP_NAME" --json --lines 200 || true
