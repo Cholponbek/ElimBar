@@ -21,6 +21,22 @@ jobs:
           echo "Secret length: ${#RAILWAY_TOKEN}"
           echo "Last 4 chars: ${RAILWAY_TOKEN: -4}"
 
+      - name: Raw GraphQL API call (bypass CLI)
+        run: |
+          curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ me { id email } }"}' \
+            -w "\nHTTP_STATUS:%{http_code}\n"
+
+      - name: Raw GraphQL API call with Project-Access-Token header (project token style)
+        run: |
+          curl -sS -X POST https://backboard.railway.com/graphql/v2 \
+            -H "Project-Access-Token: $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ me { id email } }"}' \
+            -w "\nHTTP_STATUS:%{http_code}\n"
+
       - name: whoami
         run: railway whoami
 
