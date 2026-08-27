@@ -25,8 +25,19 @@ jobs:
       #   plugin as "the app" this way and deployed the Laravel Docker
       #   image onto it (`railway up --service Postgres`), corrupting it.
       #   The app service name is now hardcoded below instead of guessed.
+      # - The "elimbar-demo" service (auto-created by Railway's dashboard
+      #   "Empty Project" flow) never had a real deployment, and `railway
+      #   up --service elimbar-demo` consistently 404s on code upload
+      #   ({"code":"UPLOAD_FAILED",...}) across multiple separate runs —
+      #   it looks structurally broken for a headless project-token
+      #   upload targeting a service with no prior ServiceInstance. `up
+      #   --service Postgres` worked fine earlier specifically because
+      #   Postgres already had a real deployment. Fix: target a NEW
+      #   service name so `up` creates a fresh, properly-initialized one
+      #   instead of fighting the broken placeholder (which gets deleted
+      #   below alongside the earlier corrupted "Postgres").
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      APP_SERVICE: elimbar-demo
+      APP_SERVICE: web
       APP_KEY: "base64:l+hJHtDNk4lV1l5RnDRbS6nM1FfKuR1ZK7j7R5vt+5k="
       DB_STAFF_PASSWORD: "325611af4e8ba0b692b44794e9659d7b"
       DB_PUBLIC_PASSWORD: "63e7cf84f718bc4a0f3634494a521461"
@@ -51,18 +62,25 @@ jobs:
         run: |
           railway link --project "${{ steps.status0.outputs.project_id }}" --environment "${{ steps.status0.outputs.env_id }}" --json || true
 
-      - name: Clean up the mis-deployed Postgres service from the previous run
+      - name: Clean up broken/corrupted services from previous runs
         run: |
-          # A prior run's service-name guess deployed the Laravel image onto
-          # the actual Postgres plugin (literally named "Postgres"). Remove
-          # that corrupted service — the real database survived under an
-          # auto-deduped name (e.g. "Postgres-QUoE", discovered below) and
-          # is untouched. This is a no-op (safe to keep re-running) once
-          # the bad service is gone.
+          # "Postgres": a prior run's service-name guess deployed the
+          # Laravel image onto the actual Postgres plugin. The real
+          # database survived under an auto-deduped name (e.g.
+          # "Postgres-QUoE", discovered below) and is untouched.
+          # "elimbar-demo": the original dashboard-created empty
+          # placeholder that never accepted a code upload. Both deletes
+          # are no-ops (safe to keep re-running) once the services are gone.
           railway service delete --service Postgres --yes --json || true
+          railway service delete --service elimbar-demo --yes --json || true
 
       - name: Deploy app service from Dockerfile
         run: |
+          # Ensure a fresh "web" service exists before uploading code to it
+          # (harmless no-op if it's already there from a prior attempt).
+          railway add --service "$APP_SERVICE" --json || true
+          sleep 3
+
           # railway CLI often exits 0 even when the call itself failed (it
           # just prints an {"code":...,"error":...} JSON object) — a plain
           # `up | tee` swallows that and every downstream step then chases
