@@ -1,1 +1,151 @@
-bmFtZTogRGVwbG95IGRlbW8gKFJhaWx3YXkpCgpvbjoKICB3b3JrZmxvd19kaXNwYXRjaDoKCmpvYnM6CiAgZGVwbG95OgogICAgcnVucy1vbjogdWJ1bnR1LWxhdGVzdAogICAgZW52OgogICAgICAjIFJBSUxXQVlfQVBJX1RPS0VOLCBub3QgUkFJTFdBWV9UT0tFTiDigJQgY29uZmlybWVkIHZpYSBhIGRpYWdub3N0aWMgcnVuCiAgICAgICMgdGhhdCB0aGUgQ0xJIG9ubHkgcmVjb2duaXplcyB0aGlzIGV4YWN0IG5hbWUgKFJBSUxXQVlfVE9LRU4gZ2F2ZQogICAgICAjICJVbmF1dGhvcml6ZWQiIGV2ZW4gdGhvdWdoIHRoZSBzYW1lIHZhbHVlIHdvcmtzIGZpbmUgYXMgYSByYXcKICAgICAgIyBBdXRob3JpemF0aW9uOiBCZWFyZXIgaGVhZGVyIGFnYWluc3QgdGhlIEdyYXBoUUwgQVBJIGRpcmVjdGx5KS4KICAgICAgUkFJTFdBWV9BUElfVE9LRU46ICR7eyBzZWNyZXRzLlJBSUxXQVlfVE9LRU4gfX0KICAgICAgUFJPSkVDVF9OQU1FOiBlbGltYmFyLWRlbW8KICAgICAgQVBQX0tFWTogImJhc2U2NDpsK2hKSHRETms0bFYxbDVSbkRSYlM2bk0xRmZLdVIxWks3ajdSNXZ0KzVrPSIKICAgICAgREJfU1RBRkZfUEFTU1dPUkQ6ICIzMjU2MTFhZjRlOGJhMGI2OTJiNDQ3OTRlOTY1OWQ3YiIKICAgICAgREJfUFVCTElDX1BBU1NXT1JEOiAiNjNlN2NmODRmNzE4YmMwYTBmMzYzNDQ5NGE1MjE0NjEiCiAgICBzdGVwczoKICAgICAgLSB1c2VzOiBhY3Rpb25zL2NoZWNrb3V0QHY0CgogICAgICAtIG5hbWU6IEluc3RhbGwgUmFpbHdheSBDTEkKICAgICAgICBydW46IG5wbSBpIC1nIEByYWlsd2F5L2NsaQoKICAgICAgLSBuYW1lOiB3aG9hbWkKICAgICAgICBydW46IHJhaWx3YXkgd2hvYW1pCgogICAgICAtIG5hbWU6IENyZWF0ZSBwcm9qZWN0ICsgZGVwbG95IGFwcCBzZXJ2aWNlIGZyb20gRG9ja2VyZmlsZQogICAgICAgIHJ1bjogfAogICAgICAgICAgcmFpbHdheSB1cCAteSAtLWRldGFjaCAtLWpzb24gLS1uYW1lICIkUFJPSkVDVF9OQU1FIiB8IHRlZSAvdG1wL3VwLmpzb24KCiAgICAgIC0gbmFtZTogTGlzdCBzZXJ2aWNlcyAoYXBwIG9ubHksIHJpZ2h0IGFmdGVyIHByb2plY3QgY3JlYXRpb24pCiAgICAgICAgcnVuOiB8CiAgICAgICAgICByYWlsd2F5IHNlcnZpY2UgbGlzdCAtLWpzb24gfCB0ZWUgL3RtcC9zZXJ2aWNlc19iZWZvcmUuanNvbiB8fCBlY2hvICdbXScgfCB0ZWUgL3RtcC9zZXJ2aWNlc19iZWZvcmUuanNvbgoKICAgICAgLSBuYW1lOiBBZGQgUG9zdGdyZXMgcGx1Z2luCiAgICAgICAgcnVuOiB8CiAgICAgICAgICByYWlsd2F5IGFkZCAtLWRhdGFiYXNlIHBvc3RncmVzIC0tanNvbiB8IHRlZSAvdG1wL2FkZC5qc29uCgogICAgICAtIG5hbWU6IExpc3Qgc2VydmljZXMgYWdhaW4gKGFwcCArIHBvc3RncmVzKQogICAgICAgIHJ1bjogfAogICAgICAgICAgcmFpbHdheSBzZXJ2aWNlIGxpc3QgLS1qc29uIHwgdGVlIC90bXAvc2VydmljZXNfYWZ0ZXIuanNvbiB8fCBlY2hvICdbXScgfCB0ZWUgL3RtcC9zZXJ2aWNlc19hZnRlci5qc29uCgogICAgICAtIG5hbWU6IFJlc29sdmUgYXBwL3Bvc3RncmVzIHNlcnZpY2UgbmFtZXMKICAgICAgICBpZDogbmFtZXMKICAgICAgICBydW46IHwKICAgICAgICAgIEFQUF9OQU1FPSQoanEgLXIgJy5bMF0ubmFtZSAvLyBlbXB0eScgL3RtcC9zZXJ2aWNlc19iZWZvcmUuanNvbikKICAgICAgICAgIGVjaG8gImFwcF9uYW1lPSRBUFBfTkFNRSIgfCB0ZWUgLWEgIiRHSVRIVUJfT1VUUFVUIgogICAgICAgICAgUEdfTkFNRT0kKGpxIC1yIC0tYXJnIGFwcG5hbWUgIiRBUFBfTkFNRSIgJ1suW10gfCBzZWxlY3QoLm5hbWUgIT0gJGFwcG5hbWUpXVswXS5uYW1lIC8vIGVtcHR5JyAvdG1wL3NlcnZpY2VzX2FmdGVyLmpzb24pCiAgICAgICAgICBlY2hvICJwZ19uYW1lPSRQR19OQU1FIiB8IHRlZSAtYSAiJEdJVEhVQl9PVVRQVVQiCiAgICAgICAgICBlY2hvICJSZXNvbHZlZCBhcHA9JEFQUF9OQU1FIHBvc3RncmVzPSRQR19OQU1FIgoKICAgICAgLSBuYW1lOiBEaXNjb3ZlciBQb3N0Z3JlcyBjb25uZWN0aW9uIGRldGFpbHMKICAgICAgICBpZDogcGcKICAgICAgICBydW46IHwKICAgICAgICAgIFBHX05BTUU9IiR7eyBzdGVwcy5uYW1lcy5vdXRwdXRzLnBnX25hbWUgfX0iCiAgICAgICAgICByYWlsd2F5IHZhcmlhYmxlIGxpc3QgLS1zZXJ2aWNlICIkUEdfTkFNRSIgLS1qc29uIHwgdGVlIC90bXAvcGd2YXJzLmpzb24KCiAgICAgICAgICBEQl9IT1NUPSQoanEgLXIgJy5QR0hPU1QgLy8gZW1wdHknIC90bXAvcGd2YXJzLmpzb24pCiAgICAgICAgICBEQl9QT1JUPSQoanEgLXIgJy5QR1BPUlQgLy8gZW1wdHknIC90bXAvcGd2YXJzLmpzb24pCiAgICAgICAgICBEQl9EQVRBQkFTRT0kKGpxIC1yICcuUEdEQVRBQkFTRSAvLyBlbXB0eScgL3RtcC9wZ3ZhcnMuanNvbikKICAgICAgICAgIERCX1VTRVJOQU1FPSQoanEgLXIgJy5QR1VTRVIgLy8gZW1wdHknIC90bXAvcGd2YXJzLmpzb24pCiAgICAgICAgICBEQl9QQVNTV09SRD0kKGpxIC1yICcuUEdQQVNTV09SRCAvLyBlbXB0eScgL3RtcC9wZ3ZhcnMuanNvbikKCiAgICAgICAgICBpZiBbIC16ICIkREJfSE9TVCIgXTsgdGhlbgogICAgICAgICAgICBEQVRBQkFTRV9VUkw9JChqcSAtciAnLkRBVEFCQVNFX1VSTCAvLyBlbXB0eScgL3RtcC9wZ3ZhcnMuanNvbikKICAgICAgICAgICAgaWYgWyAtbiAiJERBVEFCQVNFX1VSTCIgXTsgdGhlbgogICAgICAgICAgICAgIGV2YWwgIiQoREFUQUJBU0VfVVJMPSIkREFUQUJBU0VfVVJMIiBweXRob24zIC1jICIKaW1wb3J0IG9zLCB1cmxsaWIucGFyc2UgYXMgdXAKdSA9IHVwLnVybHBhcnNlKG9zLmVudmlyb25bJ0RBVEFCQVNFX1VSTCddKQpwcmludChmJ0RCX0hPU1Q9e3UuaG9zdG5hbWV9JykKcHJpbnQoZidEQl9QT1JUPXt1LnBvcnR9JykKcHJpbnQoZidEQl9EQVRBQkFTRT17dS5wYXRoLmxzdHJpcChjaHIoNDcpKX0nKQpwcmludChmJ0RCX1VTRVJOQU1FPXt1LnVzZXJuYW1lfScpCnByaW50KGYnREJfUEFTU1dPUkQ9e3UucGFzc3dvcmR9JykKIikiCiAgICAgICAgICAgIGZpCiAgICAgICAgICBmaQoKICAgICAgICAgIGVjaG8gIlJlc29sdmVkOiBob3N0PSREQl9IT1NUIHBvcnQ9JERCX1BPUlQgZGI9JERCX0RBVEFCQVNFIHVzZXI9JERCX1VTRVJOQU1FIHBhc3NfbGVuPSR7I0RCX1BBU1NXT1JEfSIKICAgICAgICAgIHsKICAgICAgICAgICAgZWNobyAiaG9zdD0kREJfSE9TVCIKICAgICAgICAgICAgZWNobyAicG9ydD0kREJfUE9SVCIKICAgICAgICAgICAgZWNobyAiZGF0YWJhc2U9JERCX0RBVEFCQVNFIgogICAgICAgICAgICBlY2hvICJ1c2VybmFtZT0kREJfVVNFUk5BTUUiCiAgICAgICAgICAgIGVjaG8gInBhc3N3b3JkPSREQl9QQVNTV09SRCIKICAgICAgICAgIH0gPj4gIiRHSVRIVUJfT1VUUFVUIgoKICAgICAgLSBuYW1lOiBTZXQgYXBwIGVudmlyb25tZW50IHZhcmlhYmxlcwogICAgICAgIHJ1bjogfAogICAgICAgICAgQVBQX05BTUU9IiR7eyBzdGVwcy5uYW1lcy5vdXRwdXRzLmFwcF9uYW1lIH19IgogICAgICAgICAgc2V0IC0tIFwKICAgICAgICAgICAgIkFQUF9OQU1FPUVsaW1CYXIiIFwKICAgICAgICAgICAgIkFQUF9FTlY9cHJvZHVjdGlvbiIgXAogICAgICAgICAgICAiQVBQX0tFWT0kQVBQX0tFWSIgXAogICAgICAgICAgICAiQVBQX0RFQlVHPXRydWUiIFwKICAgICAgICAgICAgIkFQUF9MT0NBTEU9a3kiIFwKICAgICAgICAgICAgIkFQUF9GQUxMQkFDS19MT0NBTEU9cnUiIFwKICAgICAgICAgICAgIkFQUF9GQUtFUl9MT0NBTEU9cnVfUlUiIFwKICAgICAgICAgICAgIkFQUF9NQUlOVEVOQU5DRV9EUklWRVI9ZmlsZSIgXAogICAgICAgICAgICAiQkNSWVBUX1JPVU5EUz0xMiIgXAogICAgICAgICAgICAiVEVOQU5UX0lEPTEiIFwKICAgICAgICAgICAgIkxPR19DSEFOTkVMPXN0YWNrIiBcCiAgICAgICAgICAgICJMT0dfTEVWRUw9ZGVidWciIFwKICAgICAgICAgICAgIkRCX0NPTk5FQ1RJT049cGdzcWwiIFwKICAgICAgICAgICAgIkRCX0hPU1Q9JHt7IHN0ZXBzLnBnLm91dHB1dHMuaG9zdCB9fSIgXAogICAgICAgICAgICAiREJfUE9SVD0ke3sgc3RlcHMucGcub3V0cHV0cy5wb3J0IH19IiBcCiAgICAgICAgICAgICJEQl9EQVRBQkFTRT0ke3sgc3RlcHMucGcub3V0cHV0cy5kYXRhYmFzZSB9fSIgXAogICAgICAgICAgICAiREJfVVNFUk5BTUU9JHt7IHN0ZXBzLnBnLm91dHB1dHMudXNlcm5hbWUgfX0iIFwKICAgICAgICAgICAgIkRCX1BBU1NXT1JEPSR7eyBzdGVwcy5wZy5vdXRwdXRzLnBhc3N3b3JkIH19IiBcCiAgICAgICAgICAgICJEQl9TVEFGRl9VU0VSTkFNRT1lbGltYmFyX3N0YWZmIiBcCiAgICAgICAgICAgICJEQl9TVEFGRl9QQVNTV09SRD0kREJfU1RBRkZfUEFTU1dPUkQiIFwKICAgICAgICAgICAgIkRCX1BVQkxJQ19VU0VSTkFNRT1lbGltYmFyX3B1YmxpYyIgXAogICAgICAgICAgICAiREJfUFVCTElDX1BBU1NXT1JEPSREQl9QVUJMSUNfUEFTU1dPUkQiIFwKICAgICAgICAgICAgIlNFU1NJT05fRFJJVkVSPWRhdGFiYXNlIiBcCiAgICAgICAgICAgICJTRVNTSU9OX0xJRkVUSU1FPTEyMCIgXAogICAgICAgICAgICAiQ0FDSEVfU1RPUkU9ZGF0YWJhc2UiIFwKICAgICAgICAgICAgIlFVRVVFX0NPTk5FQ1RJT049c3luYyIgXAogICAgICAgICAgICAiQlJPQURDQVNUX0NPTk5FQ1RJT049bG9nIiBcCiAgICAgICAgICAgICJGSUxFU1lTVEVNX0RJU0s9bG9jYWwiIFwKICAgICAgICAgICAgIk1BSUxfTUFJTEVSPWxvZyIKCiAgICAgICAgICBmb3Iga3YgaW4gIiRAIjsgZG8KICAgICAgICAgICAga2V5PSIke2t2JSU9Kn0iCiAgICAgICAgICAgIGVjaG8gIlNldHRpbmcgJGtleSIKICAgICAgICAgICAgcmFpbHdheSB2YXJpYWJsZSBzZXQgIiRrdiIgLS1zZXJ2aWNlICIkQVBQX05BTUUiIC0tc2tpcC1kZXBsb3lzIC0tanNvbiA+L2Rldi9udWxsCiAgICAgICAgICBkb25lCgogICAgICAtIG5hbWU6IEdlbmVyYXRlIHB1YmxpYyBkb21haW4KICAgICAgICBpZDogZG9tYWluCiAgICAgICAgcnVuOiB8CiAgICAgICAgICBBUFBfTkFNRT0iJHt7IHN0ZXBzLm5hbWVzLm91dHB1dHMuYXBwX25hbWUgfX0iCiAgICAgICAgICByYWlsd2F5IGRvbWFpbiAtLWhlbHAgfHwgdHJ1ZQogICAgICAgICAgKHJhaWx3YXkgZG9tYWluIGFkZCAtLXNlcnZpY2UgIiRBUFBfTkFNRSIgLS1qc29uIHx8IHJhaWx3YXkgZG9tYWluIC0tc2VydmljZSAiJEFQUF9OQU1FIiAtLWpzb24gfHwgdHJ1ZSkgfCB0ZWUgL3RtcC9kb21haW4uanNvbiB8fCB0cnVlCiAgICAgICAgICBET01BSU49JChqcSAtciAnLmRvbWFpbiAvLyAuZG9tYWluc1swXS5kb21haW4gLy8gZW1wdHknIC90bXAvZG9tYWluLmpzb24gMj4vZGV2L251bGwpCiAgICAgICAgICBpZiBbIC16ICIkRE9NQUlOIiBdOyB0aGVuCiAgICAgICAgICAgIERPTUFJTj0kKGdyZXAgLW9FICdbYS16QS1aMC05Li1dK1wudXBcLnJhaWx3YXlcLmFwcCcgL3RtcC9kb21haW4uanNvbiB8IGhlYWQgLW4xIHx8IHRydWUpCiAgICAgICAgICBmaQogICAgICAgICAgZWNobyAiUmVzb2x2ZWQgZG9tYWluOiAkRE9NQUlOIgogICAgICAgICAgZWNobyAiZG9tYWluPSRET01BSU4iID4+ICIkR0lUSFVCX09VVFBVVCIKCiAgICAgIC0gbmFtZTogU2V0IEFQUF9VUkwgYW5kIHRyaWdnZXIgcmVhbCBkZXBsb3kKICAgICAgICBydW46IHwKICAgICAgICAgIEFQUF9OQU1FPSIke3sgc3RlcHMubmFtZXMub3V0cHV0cy5hcHBfbmFtZSB9fSIKICAgICAgICAgIERPTUFJTj0iJHt7IHN0ZXBzLmRvbWFpbi5vdXRwdXRzLmRvbWFpbiB9fSIKICAgICAgICAgIGlmIFsgLW4gIiRET01BSU4iIF07IHRoZW4KICAgICAgICAgICAgcmFpbHdheSB2YXJpYWJsZSBzZXQgIkFQUF9VUkw9aHR0cHM6Ly8kRE9NQUlOIiAtLXNlcnZpY2UgIiRBUFBfTkFNRSIgLS1qc29uCiAgICAgICAgICAgIHJhaWx3YXkgdmFyaWFibGUgc2V0ICJBUFBfRE9NQUlOPSRET01BSU4iIC0tc2VydmljZSAiJEFQUF9OQU1FIiAtLWpzb24KICAgICAgICAgIGVsc2UKICAgICAgICAgICAgZWNobyAiTm8gZG9tYWluIHJlc29sdmVkIOKAlCBjaGVjayB0aGUgJ0dlbmVyYXRlIHB1YmxpYyBkb21haW4nIHN0ZXAgb3V0cHV0OyB0cmlnZ2VyaW5nIHJlZGVwbG95IHdpdGhvdXQgQVBQX1VSTCB1cGRhdGUuIgogICAgICAgICAgICByYWlsd2F5IHJlZGVwbG95IC0tc2VydmljZSAiJEFQUF9OQU1FIiAtLXllcyAtLWpzb24gfHwgdHJ1ZQogICAgICAgICAgZmkKCiAgICAgIC0gbmFtZTogU2hvdyByZWNlbnQgZGVwbG95IGxvZ3MgKGJlc3QtZWZmb3J0IHNuYXBzaG90KQogICAgICAgIGNvbnRpbnVlLW9uLWVycm9yOiB0cnVlCiAgICAgICAgcnVuOiB8CiAgICAgICAgICBBUFBfTkFNRT0iJHt7IHN0ZXBzLm5hbWVzLm91dHB1dHMuYXBwX25hbWUgfX0iCiAgICAgICAgICBzbGVlcCAyMAogICAgICAgICAgcmFpbHdheSBsb2dzIC0tc2VydmljZSAiJEFQUF9OQU1FIiAtLWpzb24gLS1saW5lcyAyMDAgfHwgdHJ1ZQo=
+name: Deploy demo (Railway)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # RAILWAY_API_TOKEN, not RAILWAY_TOKEN — confirmed via a diagnostic run
+      # that the CLI only recognizes this exact name (RAILWAY_TOKEN gave
+      # "Unauthorized" even though the same value works fine as a raw
+      # Authorization: Bearer header against the GraphQL API directly).
+      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      PROJECT_NAME: elimbar-demo
+      APP_KEY: "base64:l+hJHtDNk4lV1l5RnDRbS6nM1FfKuR1ZK7j7R5vt+5k="
+      DB_STAFF_PASSWORD: "325611af4e8ba0b692b44794e9659d7b"
+      DB_PUBLIC_PASSWORD: "63e7cf84f718bc4a0f3634494a521461"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: whoami
+        run: railway whoami
+
+      - name: Create project + deploy app service from Dockerfile
+        run: |
+          railway up -y --detach --json --name "$PROJECT_NAME" | tee /tmp/up.json
+
+      - name: List services (app only, right after project creation)
+        run: |
+          railway service list --json | tee /tmp/services_before.json || echo '[]' | tee /tmp/services_before.json
+
+      - name: Add Postgres plugin
+        run: |
+          railway add --database postgres --json | tee /tmp/add.json
+
+      - name: List services again (app + postgres)
+        run: |
+          railway service list --json | tee /tmp/services_after.json || echo '[]' | tee /tmp/services_after.json
+
+      - name: Resolve app/postgres service names
+        id: names
+        run: |
+          APP_NAME=$(jq -r '.[0].name // empty' /tmp/services_before.json)
+          echo "app_name=$APP_NAME" | tee -a "$GITHUB_OUTPUT"
+          PG_NAME=$(jq -r --arg appname "$APP_NAME" '[.[] | select(.name != $appname)][0].name // empty' /tmp/services_after.json)
+          echo "pg_name=$PG_NAME" | tee -a "$GITHUB_OUTPUT"
+          echo "Resolved app=$APP_NAME postgres=$PG_NAME"
+
+      - name: Discover Postgres connection details
+        id: pg
+        run: |
+          PG_NAME="${{ steps.names.outputs.pg_name }}"
+          railway variable list --service "$PG_NAME" --json | tee /tmp/pgvars.json
+
+          DB_HOST=$(jq -r '.PGHOST // empty' /tmp/pgvars.json)
+          DB_PORT=$(jq -r '.PGPORT // empty' /tmp/pgvars.json)
+          DB_DATABASE=$(jq -r '.PGDATABASE // empty' /tmp/pgvars.json)
+          DB_USERNAME=$(jq -r '.PGUSER // empty' /tmp/pgvars.json)
+          DB_PASSWORD=$(jq -r '.PGPASSWORD // empty' /tmp/pgvars.json)
+
+          if [ -z "$DB_HOST" ]; then
+            DATABASE_URL=$(jq -r '.DATABASE_URL // empty' /tmp/pgvars.json)
+            if [ -n "$DATABASE_URL" ]; then
+              eval "$(DATABASE_URL="$DATABASE_URL" python3 -c "import os, urllib.parse as up; u = up.urlparse(os.environ['DATABASE_URL']); print(f'DB_HOST={u.hostname}'); print(f'DB_PORT={u.port}'); print(f'DB_DATABASE={u.path.lstrip(chr(47))}'); print(f'DB_USERNAME={u.username}'); print(f'DB_PASSWORD={u.password}')")"
+            fi
+          fi
+
+          echo "Resolved: host=$DB_HOST port=$DB_PORT db=$DB_DATABASE user=$DB_USERNAME pass_len=${#DB_PASSWORD}"
+          {
+            echo "host=$DB_HOST"
+            echo "port=$DB_PORT"
+            echo "database=$DB_DATABASE"
+            echo "username=$DB_USERNAME"
+            echo "password=$DB_PASSWORD"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set app environment variables
+        run: |
+          APP_NAME="${{ steps.names.outputs.app_name }}"
+          set -- \
+            "APP_NAME=ElimBar" \
+            "APP_ENV=production" \
+            "APP_KEY=$APP_KEY" \
+            "APP_DEBUG=true" \
+            "APP_LOCALE=ky" \
+            "APP_FALLBACK_LOCALE=ru" \
+            "APP_FAKER_LOCALE=ru_RU" \
+            "APP_MAINTENANCE_DRIVER=file" \
+            "BCRYPT_ROUNDS=12" \
+            "TENANT_ID=1" \
+            "LOG_CHANNEL=stack" \
+            "LOG_LEVEL=debug" \
+            "DB_CONNECTION=pgsql" \
+            "DB_HOST=${{ steps.pg.outputs.host }}" \
+            "DB_PORT=${{ steps.pg.outputs.port }}" \
+            "DB_DATABASE=${{ steps.pg.outputs.database }}" \
+            "DB_USERNAME=${{ steps.pg.outputs.username }}" \
+            "DB_PASSWORD=${{ steps.pg.outputs.password }}" \
+            "DB_STAFF_USERNAME=elimbar_staff" \
+            "DB_STAFF_PASSWORD=$DB_STAFF_PASSWORD" \
+            "DB_PUBLIC_USERNAME=elimbar_public" \
+            "DB_PUBLIC_PASSWORD=$DB_PUBLIC_PASSWORD" \
+            "SESSION_DRIVER=database" \
+            "SESSION_LIFETIME=120" \
+            "CACHE_STORE=database" \
+            "QUEUE_CONNECTION=sync" \
+            "BROADCAST_CONNECTION=log" \
+            "FILESYSTEM_DISK=local" \
+            "MAIL_MAILER=log"
+
+          for kv in "$@"; do
+            key="${kv%%=*}"
+            echo "Setting $key"
+            railway variable set "$kv" --service "$APP_NAME" --skip-deploys --json >/dev/null
+          done
+
+      - name: Generate public domain
+        id: domain
+        run: |
+          APP_NAME="${{ steps.names.outputs.app_name }}"
+          railway domain --help || true
+          (railway domain add --service "$APP_NAME" --json || railway domain --service "$APP_NAME" --json || true) | tee /tmp/domain.json || true
+          DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
+          if [ -z "$DOMAIN" ]; then
+            DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
+          fi
+          echo "Resolved domain: $DOMAIN"
+          echo "domain=$DOMAIN" >> "$GITHUB_OUTPUT"
+
+      - name: Set APP_URL and trigger real deploy
+        run: |
+          APP_NAME="${{ steps.names.outputs.app_name }}"
+          DOMAIN="${{ steps.domain.outputs.domain }}"
+          if [ -n "$DOMAIN" ]; then
+            railway variable set "APP_URL=https://$DOMAIN" --service "$APP_NAME" --json
+            railway variable set "APP_DOMAIN=$DOMAIN" --service "$APP_NAME" --json
+          else
+            echo "No domain resolved — check the 'Generate public domain' step output; triggering redeploy without APP_URL update."
+            railway redeploy --service "$APP_NAME" --yes --json || true
+          fi
+
+      - name: Show recent deploy logs (best-effort snapshot)
+        continue-on-error: true
+        run: |
+          APP_NAME="${{ steps.names.outputs.app_name }}"
+          sleep 20
+          railway logs --service "$APP_NAME" --json --lines 200 || true
