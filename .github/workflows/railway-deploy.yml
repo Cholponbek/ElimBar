@@ -7,8 +7,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       PROJECT_NAME: elimbar-demo
     steps:
       - uses: actions/checkout@v4
@@ -16,12 +14,15 @@ jobs:
       - name: Install Railway CLI
         run: npm i -g @railway/cli
 
-      - name: Token diagnostics (length + last 4 chars only, never full value)
-        run: |
-          echo "Secret length: ${#RAILWAY_TOKEN}"
-          echo "Last 4 chars: ${RAILWAY_TOKEN: -4}"
+      - name: login --help
+        run: railway login --help
 
-      - name: Raw GraphQL API call (bypass CLI)
+      - name: whoami --help
+        run: railway whoami --help
+
+      - name: Confirm token works via raw API (sanity check)
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           curl -sS -X POST https://backboard.railway.com/graphql/v2 \
             -H "Authorization: Bearer $RAILWAY_TOKEN" \
@@ -29,51 +30,19 @@ jobs:
             -d '{"query":"{ me { id email } }"}' \
             -w "\nHTTP_STATUS:%{http_code}\n"
 
-      - name: Raw GraphQL API call with Project-Access-Token header (project token style)
+      - name: Try login --browserless with token piped in
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          curl -sS -X POST https://backboard.railway.com/graphql/v2 \
-            -H "Project-Access-Token: $RAILWAY_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"query":"{ me { id email } }"}' \
-            -w "\nHTTP_STATUS:%{http_code}\n"
+          echo "$RAILWAY_TOKEN" | railway login --browserless || echo "browserless login failed (exit $?)"
 
-      - name: whoami
-        run: railway whoami
+      - name: whoami after browserless login attempt
+        run: railway whoami || echo "still unauthorized"
 
-      - name: List existing projects (debug)
-        run: railway list --json || echo "(list failed or empty)"
-
-      - name: Find or create project
+      - name: Try RAILWAY_API_TOKEN again with explicit config dir check
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          set -e
-          EXISTING=$(railway list --json 2>/dev/null | jq -r --arg name "$PROJECT_NAME" '.[]? | select(.name==$name) | .id' | head -1 || true)
-          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-            echo "Linking to existing project $EXISTING"
-            railway link -p "$EXISTING"
-          else
-            echo "Creating new project $PROJECT_NAME"
-            railway init --name "$PROJECT_NAME" --json
-          fi
-
-      - name: Status after link/init (debug)
-        run: railway status --json || echo "(status failed)"
-
-      - name: Add Postgres if missing
-        run: |
-          set -e
-          HAS_PG=$(railway status --json 2>/dev/null | jq -r '.. | .name? // empty' | grep -i postgres || true)
-          if [ -z "$HAS_PG" ]; then
-            echo "Adding Postgres"
-            railway add --database postgres --json
-          else
-            echo "Postgres already present: $HAS_PG"
-          fi
-
-      - name: Status after add postgres (debug)
-        run: railway status --json || echo "(status failed)"
-
-      - name: Deploy web service from this checkout
-        run: railway up -y --detach --json
-
-      - name: Status after up (debug)
-        run: railway status --json || echo "(status failed)"
+          railway whoami || true
+          echo "--- config dir ---"
+          find ~/.railway -type f 2>/dev/null | xargs -I{} sh -c 'echo {}; cat {}' 2>/dev/null || echo "no config dir"
