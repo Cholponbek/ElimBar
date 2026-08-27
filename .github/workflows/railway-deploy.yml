@@ -152,12 +152,26 @@ jobs:
       - name: Generate public domain
         id: domain
         run: |
-          railway domain --help || true
-          railway domain --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
-          DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
-          if [ -z "$DOMAIN" ]; then
-            DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
-          fi
+          # `up --detach` only queues the build — Railway doesn't create the
+          # ServiceInstance (service+environment+deployment binding) that
+          # `domain` needs until the build has actually started registering
+          # on the platform. A domain call right after `up` reliably fails
+          # with "ServiceInstance not found", so retry with backoff instead
+          # of accepting the first failure.
+          DOMAIN=""
+          for i in $(seq 1 15); do
+            railway domain --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
+            DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
+            if [ -z "$DOMAIN" ]; then
+              DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
+            fi
+            if [ -n "$DOMAIN" ]; then
+              echo "Got domain on attempt $i"
+              break
+            fi
+            echo "Attempt $i: no domain yet ($(cat /tmp/domain.json)), retrying in 10s"
+            sleep 10
+          done
           echo "Resolved domain: $DOMAIN"
           echo "domain=$DOMAIN" >> "$GITHUB_OUTPUT"
 
