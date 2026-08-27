@@ -63,7 +63,24 @@ jobs:
 
       - name: Deploy app service from Dockerfile
         run: |
-          railway up -y --detach --json --service "$APP_SERVICE" | tee /tmp/up.json
+          # railway CLI often exits 0 even when the call itself failed (it
+          # just prints an {"code":...,"error":...} JSON object) — a plain
+          # `up | tee` swallows that and every downstream step then chases
+          # a deploy that never happened. Check for a real deploymentId and
+          # retry/fail loudly instead.
+          for i in 1 2 3; do
+            railway up -y --detach --json --service "$APP_SERVICE" | tee /tmp/up.json
+            if jq -e '.deploymentId' /tmp/up.json >/dev/null 2>&1; then
+              echo "Deploy queued OK on attempt $i"
+              break
+            fi
+            echo "Attempt $i: up failed ($(cat /tmp/up.json)), retrying in 15s"
+            sleep 15
+            if [ "$i" = "3" ]; then
+              echo "::error::railway up failed 3 times, aborting rather than wasting time downstream"
+              exit 1
+            fi
+          done
 
       - name: Find or create the Postgres service
         id: names
