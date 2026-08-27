@@ -28,6 +28,21 @@ RLS-политики создаются миграцией `2025_01_01_000900_se
 — отдельного шага для них не требуется, только пароли в `.env`
 (`DB_STAFF_PASSWORD`, `DB_PUBLIC_PASSWORD`) до первого `migrate`.
 
+## Демо-деплой (Railway/Render)
+
+`docker/railway/` — отдельный образ **только для демонстрации**, не для
+прода. Один контейнер (`php artisan serve`, без php-fpm/Caddy), без
+Redis (сессии/кэш/очереди — через Postgres, `QUEUE_CONNECTION=sync`), при
+старте сам накатывает миграции и идемпотентные сиды
+(`DatabaseSeeder` + `DemoSeeder` — несколько кейсов с вымышленными
+бенефициарами, безопасно держать на любом хостинге, не только в КР, см.
+ARCHITECTURE.md §10, §12). Прод остаётся `docker-compose.yml` в корне.
+
+Нужные переменные окружения — как в `.env.example`, плюс `PORT`
+(подставляет сама платформа) и без `REDIS_*`/`AWS_*`/MinIO —
+`SESSION_DRIVER=database`, `CACHE_STORE=database`,
+`QUEUE_CONNECTION=sync`, `FILESYSTEM_DISK=local`.
+
 ## Тесты
 
 ```bash
@@ -62,7 +77,7 @@ vendor/bin/pint --test       # code style
   append-only защита (`IsAppendOnly`) поверх БД-триггеров.
 - `database/migrations` — схема, CHECK-констрейнты, триггеры, RLS-политики.
   Денежные инварианты закреплены здесь, не в коде приложения.
-- `docker/` — `Dockerfile` (php-fpm), `Caddyfile`.
+- `docker/` — `Dockerfile` (php-fpm) + `Caddyfile` (прод); `railway/` — образ для демо-хостинга.
 - `tests/Feature/{Donations,Disbursements,Payments}` — тесты на денежные
   инварианты (пара happy path / нарушение) и идемпотентность вебхуков.
 
