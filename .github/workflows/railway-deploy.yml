@@ -207,6 +207,10 @@ jobs:
             echo "Attempt $i: no domain yet ($(cat /tmp/domain.json)), retrying in 10s"
             sleep 10
           done
+          # `.domain` in the JSON response is a full URL (with scheme),
+          # not a bare hostname — normalize so downstream steps can
+          # consistently prepend "https://" themselves without doubling up.
+          DOMAIN=$(echo "$DOMAIN" | sed -E 's#^https?://##')
           echo "Resolved domain: $DOMAIN"
           echo "domain=$DOMAIN" >> "$GITHUB_OUTPUT"
 
