@@ -7,12 +7,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # RAILWAY_API_TOKEN, not RAILWAY_TOKEN — confirmed via a diagnostic run
-      # that the CLI only recognizes this exact name (RAILWAY_TOKEN gave
-      # "Unauthorized" even though the same value works fine as a raw
-      # Authorization: Bearer header against the GraphQL API directly).
-      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      PROJECT_NAME: elimbar-demo
+      # This is a PROJECT token (created inside an already-existing Railway
+      # project → Settings → Tokens), not an account token. Project tokens
+      # use the RAILWAY_TOKEN env var name and are scoped to one project +
+      # environment — no `railway login` / project creation needed, but
+      # also no `whoami` (there's no "user" in this auth mode).
+      #
+      # Earlier attempts used an ACCOUNT token under RAILWAY_API_TOKEN:
+      # that satisfies `railway whoami` (identity-only check) but fails
+      # with NOT_AUTHENTICATED on `up`/`add`/`link` — those require either
+      # a real browser login or a project token. Since project tokens can
+      # only be minted for a project that already exists, the empty
+      # project had to be created once by hand in the dashboard.
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       APP_KEY: "base64:l+hJHtDNk4lV1l5RnDRbS6nM1FfKuR1ZK7j7R5vt+5k="
       DB_STAFF_PASSWORD: "325611af4e8ba0b692b44794e9659d7b"
       DB_PUBLIC_PASSWORD: "63e7cf84f718bc4a0f3634494a521461"
@@ -22,14 +29,16 @@ jobs:
       - name: Install Railway CLI
         run: npm i -g @railway/cli
 
-      - name: whoami
-        run: railway whoami
-
-      - name: Create project + deploy app service from Dockerfile
+      - name: Project status (diagnostic — project tokens have no whoami)
         run: |
-          railway up -y --detach --json --name "$PROJECT_NAME" | tee /tmp/up.json
+          railway status --json || true
+          railway service list --json || echo '[]'
 
-      - name: List services (app only, right after project creation)
+      - name: Deploy app service from Dockerfile into the existing project
+        run: |
+          railway up -y --detach --json | tee /tmp/up.json
+
+      - name: List services (app only, right after first deploy)
         run: |
           railway service list --json | tee /tmp/services_before.json || echo '[]' | tee /tmp/services_before.json
 
