@@ -1,0 +1,57 @@
+name: Deploy demo (Railway)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      PROJECT_NAME: elimbar-demo
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: whoami
+        run: railway whoami
+
+      - name: List existing projects (debug)
+        run: railway list --json || echo "(list failed or empty)"
+
+      - name: Find or create project
+        run: |
+          set -e
+          EXISTING=$(railway list --json 2>/dev/null | jq -r --arg name "$PROJECT_NAME" '.[]? | select(.name==$name) | .id' | head -1 || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            echo "Linking to existing project $EXISTING"
+            railway link -p "$EXISTING"
+          else
+            echo "Creating new project $PROJECT_NAME"
+            railway init --name "$PROJECT_NAME" --json
+          fi
+
+      - name: Status after link/init (debug)
+        run: railway status --json || echo "(status failed)"
+
+      - name: Add Postgres if missing
+        run: |
+          set -e
+          HAS_PG=$(railway status --json 2>/dev/null | jq -r '.. | .name? // empty' | grep -i postgres || true)
+          if [ -z "$HAS_PG" ]; then
+            echo "Adding Postgres"
+            railway add --database postgres --json
+          else
+            echo "Postgres already present: $HAS_PG"
+          fi
+
+      - name: Status after add postgres (debug)
+        run: railway status --json || echo "(status failed)"
+
+      - name: Deploy web service from this checkout
+        run: railway up -y --detach --json
+
+      - name: Status after up (debug)
+        run: railway status --json || echo "(status failed)"
