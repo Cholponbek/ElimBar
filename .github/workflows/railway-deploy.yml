@@ -1,9 +1,5 @@
 name: Deploy demo (Railway)
 
-# Touched once to force GitHub Actions to (re-)register this workflow
-# for workflow_dispatch — the initial push via the Contents API wasn't
-# picked up immediately.
-
 on:
   workflow_dispatch:
 
@@ -12,12 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       PROJECT_NAME: elimbar-demo
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Railway CLI
         run: npm i -g @railway/cli
+
+      - name: Token diagnostics (length + last 4 chars only, never full value)
+        run: |
+          echo "Secret length: ${#RAILWAY_TOKEN}"
+          echo "Last 4 chars: ${RAILWAY_TOKEN: -4}"
 
       - name: whoami
         run: railway whoami
