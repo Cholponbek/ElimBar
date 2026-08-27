@@ -1,5 +1,9 @@
 name: Deploy demo (Railway)
 
+# Touched once to force GitHub Actions to (re-)register this workflow
+# for workflow_dispatch — the initial push via the Contents API wasn't
+# picked up immediately.
+
 on:
   workflow_dispatch:
 
