@@ -21,9 +21,18 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ])->assignRole('admin');
+        // Сидер должен безопасно переживать повторный запуск (перезапуск/
+        // передеплой контейнера на демо-хостинге), а не падать на
+        // уникальном email. firstOrCreate() здесь не подходит — password
+        // (NOT NULL) заполняется только фабрикой.
+        $admin = User::where('email', 'test@example.com')->first()
+            ?? User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+
+        if (! $admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
     }
 }

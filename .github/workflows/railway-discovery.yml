@@ -1,0 +1,45 @@
+name: Railway CLI discovery (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Version
+        run: railway --version
+
+      - name: Top-level help
+        run: railway --help
+
+      - name: init --help
+        run: railway init --help
+
+      - name: link --help
+        run: railway link --help
+
+      - name: add --help
+        run: railway add --help
+
+      - name: variables --help
+        run: railway variables --help
+
+      - name: up --help
+        run: railway up --help
+
+      - name: service --help
+        run: railway service --help
+
+      - name: whoami (only if token secret is set)
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -n "$RAILWAY_API_TOKEN" ]; then
+            railway whoami
+          else
+            echo "RAILWAY_TOKEN secret not set yet, skipping whoami"
+          fi
