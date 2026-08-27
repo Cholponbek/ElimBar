@@ -36,6 +36,11 @@ return new class extends Migration
         // cases: app_public reads only the cases_public view (below), never
         // the base table — it carries beneficiary-linked private columns.
         'cases',
+        // ИСПРАВЛЕНО в 2026_08_26_090100_revoke_disbursements_from_app_public:
+        // disbursements по ошибке остался вне этого списка, app_public получил
+        // на неё SELECT/INSERT наравне с donations. Выплата — действие
+        // сотрудника (contour B), донор никогда не должен писать сюда.
+        // Оставлено здесь как есть, актуальные права — в миграции-фиксе.
     ];
 
     public function up(): void
