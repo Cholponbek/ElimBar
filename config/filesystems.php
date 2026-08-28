@@ -64,8 +64,17 @@ return [
         // суммы). Публичного бакета для них нет и не будет — доступ только
         // через Proof::temporaryUrl() (подписанная ссылка, короткий TTL).
         // См. ARCHITECTURE.md §7.
+        //
+        // Без AWS_BUCKET (демо-окружение без выделенного MinIO/S3) падаем
+        // на локальный диск с тем же контрактом подписанных временных
+        // ссылок ('serve' => true даёт тот же Proof::temporaryUrl()) —
+        // не публичный бакет, но и не настоящий S3. 'url' задан отдельно
+        // от диска 'local', чтобы не столкнуться на одном /storage/{path}.
         'proofs' => [
-            'driver' => 's3',
+            'driver' => env('AWS_BUCKET') ? 's3' : 'local',
+            'root' => storage_path('app/private/proofs'),
+            'url' => '/proofs-storage',
+            'serve' => true,
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
