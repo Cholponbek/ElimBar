@@ -2,7 +2,7 @@
 # в корне репозитория (php-fpm + Caddy + отдельные Postgres/Redis/MinIO).
 # Здесь всё в одном контейнере через `php artisan serve`, без Redis —
 # специально просто и дёшево для показа донору, а не для реальной нагрузки.
-FROM php:8.3-cli-alpine
+FROM php:8.4-cli-alpine
 
 RUN apk add --no-cache \
         postgresql-dev \
@@ -12,7 +12,7 @@ RUN apk add --no-cache \
         nodejs \
         npm \
         $PHPIZE_DEPS \
-    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache \
+    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache pcntl \
     && apk del $PHPIZE_DEPS
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
