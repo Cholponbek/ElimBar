@@ -1,0 +1,73 @@
+name: Verify proofs upload on live demo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install playwright@1.48.0
+      - run: npx playwright install --with-deps chromium
+      - name: Run upload verification
+        run: |
+          cat > verify.js <<'SCRIPT'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+
+          const BASE = 'https://web-production-6db0ba.up.railway.app';
+          fs.writeFileSync('/tmp/live-test-receipt.txt', 'Live demo test receipt.');
+
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+            page.on('console', (msg) => { if (msg.type() === 'error') console.log('[console]', msg.text()); });
+
+            await page.goto(BASE + '/admin/login', { waitUntil: 'load', timeout: 30000 });
+            await page.fill('input[type="email"]', 'test@example.com');
+            await page.fill('input[type="password"]', 'password');
+            await page.click('button[type="submit"]');
+            await page.waitForTimeout(2000);
+            console.log('after login url:', page.url());
+
+            await page.goto(BASE + '/admin/proofs', { waitUntil: 'load', timeout: 30000 });
+            await page.waitForTimeout(1500);
+
+            await page.click('text=Создать');
+            await page.waitForTimeout(1000);
+
+            const fileInput = page.locator('input[type="file"]');
+            await fileInput.setInputFiles('/tmp/live-test-receipt.txt');
+            await page.waitForSelector('text=Uploading', { state: 'hidden', timeout: 20000 }).catch(() => {});
+            await page.waitForTimeout(1500);
+
+            const submitBtn = page.locator('.fi-modal button[type="submit"]').first();
+            await submitBtn.click();
+            await page.waitForTimeout(3000);
+
+            const bodyText = await page.textContent('body').catch(() => '');
+            console.log('HAS_SERVER_ERROR:', /Server Error|Exception|Whoops|Internal Server Error/i.test(bodyText || ''));
+            console.log('FINAL_URL:', page.url());
+
+            const openLink = page.locator('text=Открыть').first();
+            if (await openLink.count() > 0) {
+              const href = await openLink.getAttribute('href');
+              console.log('OPEN_LINK_HREF:', href);
+              if (href) {
+                const resp = await page.request.get(href);
+                console.log('OPEN_LINK_STATUS:', resp.status());
+                const text = await resp.text();
+                console.log('OPEN_LINK_BODY:', text.slice(0, 200));
+              }
+            } else {
+              console.log('NO_OPEN_LINK_FOUND');
+            }
+
+            await browser.close();
+          })();
+          SCRIPT
+          node verify.js
