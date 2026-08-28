@@ -196,7 +196,13 @@ jobs:
           DOMAIN=""
           for i in $(seq 1 15); do
             railway domain --service "$APP_SERVICE" --json | tee /tmp/domain.json || true
-            DOMAIN=$(jq -r '.domain // .domains[0].domain // empty' /tmp/domain.json 2>/dev/null)
+            # The response shape differs depending on whether this call
+            # created a new domain ({"domain": "..."}) or listed an
+            # already-existing one ({"domains": ["..."]}, plain strings,
+            # not objects) — a jq filter assuming one shape errors (and
+            # aborts the script under `set -e`) on the other. Try both,
+            # never let jq itself fail the step.
+            DOMAIN=$(jq -r 'if .domain then .domain elif (.domains? | type) == "array" then (.domains[0] | if type == "object" then .domain else . end) else empty end' /tmp/domain.json 2>/dev/null || true)
             if [ -z "$DOMAIN" ]; then
               DOMAIN=$(grep -oE '[a-zA-Z0-9.-]+\.up\.railway\.app' /tmp/domain.json | head -n1 || true)
             fi
