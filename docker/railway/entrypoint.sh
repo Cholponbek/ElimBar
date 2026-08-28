@@ -10,6 +10,14 @@ until php artisan db:show >/dev/null 2>&1; do
 done
 echo "Database is up."
 
+# Skipped at build time (--no-scripts on composer dump-autoload) since
+# any artisan bootstrap opens a real DB connection here — our own
+# TenantServiceProvider fires on ConnectionEstablished and immediately
+# runs a query to set the RLS session var, which fails against the
+# nonexistent build-time database. Safe now that Postgres is confirmed
+# reachable above.
+php artisan package:discover --ansi
+
 php artisan migrate --force
 
 # Оба сидера идемпотентны (см. комментарии в самих классах) — безопасно

@@ -36,7 +36,12 @@ COPY . .
 # `composer dump-autoload`'s package:discover hook boots the app.
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data storage/logs bootstrap/cache
 
-RUN composer dump-autoload --optimize --no-dev \
+# --no-scripts: composer's post-autoload-dump hook runs `artisan
+# package:discover`, which boots the app far enough that our own
+# TenantServiceProvider (fires on ConnectionEstablished) tries a real
+# DB query — there is no database at build time. Run package:discover
+# instead in entrypoint.sh, once the real Postgres is confirmed up.
+RUN composer dump-autoload --optimize --no-dev --no-scripts \
     && npm run build \
     && rm -rf node_modules
 
