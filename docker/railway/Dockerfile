@@ -27,6 +27,15 @@ RUN npm ci
 
 COPY . .
 
+# .dockerignore excludes these runtime cache dirs (to avoid baking in
+# stale local artifacts), which means they never land in the build
+# context at all — not even as empty directories. Laravel's view
+# config does `realpath(storage_path('framework/views'))`, which
+# silently returns false for a path that doesn't exist, and Blade's
+# Compiler throws "Please provide a valid cache path" the moment
+# `composer dump-autoload`'s package:discover hook boots the app.
+RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data storage/logs bootstrap/cache
+
 RUN composer dump-autoload --optimize --no-dev \
     && npm run build \
     && rm -rf node_modules
