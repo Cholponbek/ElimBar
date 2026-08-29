@@ -62,6 +62,12 @@ jobs:
             console.log('MODAL_STILL_OPEN:', await page.locator('.fi-modal').count() > 0);
             console.log('FINAL_URL:', page.url());
 
+            // Reload fresh (not mid-modal-transition) and look for the row for real
+            await page.goto(BASE + '/admin/proofs', { waitUntil: 'load', timeout: 30000 });
+            await page.waitForTimeout(1500);
+            const freshBody = await page.textContent('body').catch(() => '');
+            console.log('FRESH_LIST_HAS_TEST_FILE:', /live-test-receipt/i.test(freshBody || ''));
+
             const openLink = page.locator('text=Открыть').first();
             if (await openLink.count() > 0) {
               const href = await openLink.getAttribute('href');
