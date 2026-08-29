@@ -75,6 +75,15 @@ class FundCaseResource extends Resource
                         Forms\Components\Textarea::make('public_story.ru')
                             ->label('История (русский)')
                             ->rows(4),
+                        Forms\Components\FileUpload::make('public_photo_path')
+                            ->label('Фото')
+                            ->helperText('Обычная публичная картинка, без ограничений доступа — не документ о расходах.')
+                            ->disk('public')
+                            ->directory('case-photos')
+                            ->visibility('public')
+                            ->image()
+                            ->maxSize(5120)
+                            ->columnSpanFull(),
                     ]),
 
                 Forms\Components\Section::make('Бюджет и статус')
