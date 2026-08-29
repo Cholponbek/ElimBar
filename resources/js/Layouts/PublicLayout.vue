@@ -9,7 +9,12 @@ import { Link } from '@inertiajs/vue3';
                 <Link href="/" class="text-lg font-semibold tracking-tight">
                     Элим, барсыңбы?!
                 </Link>
-                <span class="text-sm text-stone-500">ОБФ · Бишкек, КР</span>
+                <div class="flex items-center gap-4">
+                    <Link href="/help" class="text-sm font-medium text-amber-600 hover:text-amber-700">
+                        Нужна помощь?
+                    </Link>
+                    <span class="text-sm text-stone-500">ОБФ · Бишкек, КР</span>
+                </div>
             </div>
         </header>
 
