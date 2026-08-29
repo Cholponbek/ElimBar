@@ -42,15 +42,24 @@ jobs:
 
             const fileInput = page.locator('input[type="file"]');
             await fileInput.setInputFiles('/tmp/live-test-receipt.txt');
-            await page.waitForSelector('text=Uploading', { state: 'hidden', timeout: 20000 }).catch(() => {});
-            await page.waitForTimeout(1500);
+            // Wait for the actual "Upload complete" badge, not just the absence of "Uploading"
+            await page.waitForSelector('text=Upload complete', { timeout: 25000 }).catch((e) => console.log('WAIT_UPLOAD_COMPLETE_FAILED:', e.message));
+            await page.waitForTimeout(1000);
+            const preSubmitText = await page.textContent('.fi-modal').catch(() => '');
+            console.log('PRE_SUBMIT_MODAL_HAS_UPLOAD_COMPLETE:', /Upload complete/i.test(preSubmitText || ''));
 
             const submitBtn = page.locator('.fi-modal button[type="submit"]').first();
             await submitBtn.click();
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout(1000);
+            // Wait for the modal to actually close (create succeeded) or stay open (validation failed)
+            await page.waitForSelector('.fi-modal', { state: 'hidden', timeout: 8000 }).catch(() => {});
+            await page.waitForTimeout(1500);
 
             const bodyText = await page.textContent('body').catch(() => '');
             console.log('HAS_SERVER_ERROR:', /Server Error|Exception|Whoops|Internal Server Error/i.test(bodyText || ''));
+            console.log('HAS_VALIDATION_ERROR:', /validation\.required|required\./i.test(bodyText || ''));
+            console.log('HAS_SUCCESS_NOTIFICATION:', /Создано/i.test(bodyText || ''));
+            console.log('MODAL_STILL_OPEN:', await page.locator('.fi-modal').count() > 0);
             console.log('FINAL_URL:', page.url());
 
             const openLink = page.locator('text=Открыть').first();
