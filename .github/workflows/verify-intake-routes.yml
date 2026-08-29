@@ -1,0 +1,19 @@
+name: Verify intake routes on live demo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl the new routes
+        run: |
+          BASE=https://web-production-6db0ba.up.railway.app
+          echo "--- GET \$BASE/help ---"
+          curl -sS -o /tmp/help.html -w "HTTP_STATUS:%{http_code}\n" "$BASE/help"
+          echo "has intake form heading:"
+          grep -o "Нужна помощь?" /tmp/help.html || echo "NOT FOUND"
+          echo "--- GET \$BASE/admin/public-intakes (expect redirect to login, not 500) ---"
+          curl -sS -o /tmp/admin.html -w "HTTP_STATUS:%{http_code}\n" -L "$BASE/admin/public-intakes"
+          grep -o "Internal Server Error\|Exception\|Whoops" /tmp/admin.html || echo "no server error markers"
