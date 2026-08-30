@@ -13,20 +13,184 @@ const page = usePage();
 const locale = () => page.props.locale;
 const flashSuccess = () => page.props.flash?.success;
 
-// Ссылка на конкретный кейс — то, чем реально делятся. Инстаграм не даёт
-// сайту напрямую опубликовать пост/сторис через URL (в отличие от Telegram/
-// WhatsApp), поэтому для него единственный путь — системное меню "Поделиться"
-// на телефоне (canNativeShare ниже): оно само предложит Instagram среди
-// приложений, а превью (фото/заголовок) возьмёт из og:* тегов страницы.
+// Ссылка на конкретный кейс — то, чем реально делятся.
 const shareUrl = computed(() => (typeof window !== 'undefined' ? window.location.href : ''));
 const shareTitle = computed(() => pickLocale(props.case.title, locale()));
 const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+const categoryLabel = (category) => ({
+    medical: 'Лечение',
+    winter_food: 'Зимняя продуктовая помощь',
+}[category] ?? category);
+
+const progressPercent = () =>
+    props.case.budget_minor > 0
+        ? Math.min(100, Math.round((props.case.allocated_minor / props.case.budget_minor) * 100))
+        : 0;
+
+// Инстаграм не даёт сайту напрямую опубликовать сторис через URL. Хуже того:
+// его расширение в системном меню "Поделиться" откликается в основном на
+// изображения/видео — обычный текст+ссылка часто вообще не показывает пункт
+// "Добавить в историю". Поэтому рисуем карточку самим (Canvas) и передаём её
+// как файл: тогда Instagram принимает её как фон сторис. Если браузер не
+// умеет шарить файлы (Web Share Level 2, часто отсутствует на десктопе) —
+// просто скачиваем картинку, чтобы можно было загрузить её вручную.
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+function drawImageCover(ctx, img, x, y, w, h) {
+    const imgRatio = img.width / img.height;
+    const boxRatio = w / h;
+    let sx, sy, sw, sh;
+    if (imgRatio > boxRatio) {
+        sh = img.height;
+        sw = sh * boxRatio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+    } else {
+        sw = img.width;
+        sh = sw / boxRatio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function wrapText(ctx, text, maxWidth, maxLines) {
+    const words = (text || '').split(' ');
+    const lines = [];
+    let current = '';
+    for (const word of words) {
+        const test = current ? `${current} ${word}` : word;
+        if (current && ctx.measureText(test).width > maxWidth) {
+            lines.push(current);
+            current = word;
+            if (lines.length === maxLines) break;
+        } else {
+            current = test;
+        }
+    }
+    if (current && lines.length < maxLines) {
+        lines.push(current);
+    }
+    return lines.slice(0, maxLines);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+async function buildStoryImage() {
+    const width = 1080;
+    const height = 1920;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (props.case.photoUrl) {
+        const img = await loadImage(props.case.photoUrl);
+        drawImageCover(ctx, img, 0, 0, width, height);
+        const overlay = ctx.createLinearGradient(0, height * 0.35, 0, height);
+        overlay.addColorStop(0, 'rgba(12, 10, 9, 0)');
+        overlay.addColorStop(1, 'rgba(12, 10, 9, 0.92)');
+        ctx.fillStyle = overlay;
+        ctx.fillRect(0, 0, width, height);
+    } else {
+        const bg = ctx.createLinearGradient(0, 0, width, height);
+        bg.addColorStop(0, '#f59e0b');
+        bg.addColorStop(1, '#b45309');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 40px system-ui, sans-serif';
+    ctx.fillText('ElimBar', 64, 96);
+    ctx.font = '400 28px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText('Элим, барсыңбы?!', 64, 136);
+
+    ctx.font = '700 32px system-ui, sans-serif';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText(categoryLabel(props.case.category).toUpperCase(), 64, height - 620);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 64px system-ui, sans-serif';
+    const titleLines = wrapText(ctx, pickLocale(props.case.title, locale()), width - 128, 3);
+    let ty = height - 540;
+    titleLines.forEach((line) => {
+        ctx.fillText(line, 64, ty);
+        ty += 74;
+    });
+
+    const barY = height - 300;
+    const barW = width - 128;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    roundRect(ctx, 64, barY, barW, 16, 8);
+    ctx.fill();
+    ctx.fillStyle = '#fbbf24';
+    roundRect(ctx, 64, barY, barW * (progressPercent() / 100), 16, 8);
+    ctx.fill();
+
+    ctx.font = '500 34px system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`${formatSom(props.case.allocated_minor)} из ${formatSom(props.case.budget_minor)}`, 64, barY + 60);
+
+    ctx.font = '600 36px system-ui, sans-serif';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText(`Поддержать → ${shareUrl.value.replace(/^https?:\/\//, '')}`, 64, height - 80);
+
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
+
+const sharingImage = ref(false);
 async function nativeShare() {
+    sharingImage.value = true;
     try {
+        const blob = await buildStoryImage().catch(() => null);
+        if (blob) {
+            const file = new File([blob], 'elimbar-case.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: shareTitle.value, text: shareUrl.value });
+                return;
+            }
+        }
+        // Файловый шеринг недоступен — обычная ссылка (сторис у Instagram
+        // в этом случае может не появиться, но остальные приложения ей рады).
         await navigator.share({ title: shareTitle.value, url: shareUrl.value });
     } catch {
         // Пользователь закрыл системное меню — не ошибка.
+    } finally {
+        sharingImage.value = false;
+    }
+}
+
+const downloadingImage = ref(false);
+async function downloadStoryCard() {
+    downloadingImage.value = true;
+    try {
+        const blob = await buildStoryImage();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'elimbar-case.png';
+        a.click();
+        URL.revokeObjectURL(url);
+    } finally {
+        downloadingImage.value = false;
     }
 }
 
@@ -43,16 +207,6 @@ async function copyLink() {
     linkCopied.value = true;
     setTimeout(() => (linkCopied.value = false), 2000);
 }
-
-const categoryLabel = (category) => ({
-    medical: 'Лечение',
-    winter_food: 'Зимняя продуктовая помощь',
-}[category] ?? category);
-
-const progressPercent = () =>
-    props.case.budget_minor > 0
-        ? Math.min(100, Math.round((props.case.allocated_minor / props.case.budget_minor) * 100))
-        : 0;
 
 const formatDate = (isoString) =>
     new Date(isoString).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
@@ -87,10 +241,19 @@ function submit() {
             <button
                 v-if="canNativeShare"
                 type="button"
-                class="rounded-lg bg-stone-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-stone-700"
+                :disabled="sharingImage"
+                class="rounded-lg bg-stone-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
                 @click="nativeShare"
             >
-                Поделиться
+                {{ sharingImage ? 'Готовим карточку…' : 'Поделиться' }}
+            </button>
+            <button
+                type="button"
+                :disabled="downloadingImage"
+                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300 disabled:opacity-60"
+                @click="downloadStoryCard"
+            >
+                {{ downloadingImage ? 'Готовим…' : 'Скачать карточку для Stories' }}
             </button>
             <a
                 :href="telegramShareUrl"
