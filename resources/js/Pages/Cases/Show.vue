@@ -92,9 +92,70 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
+// Плашка-"таблетка" (как у GoFundMe: сумма/CTA на цветном фоне, а не голым
+// текстом) — рисует её и возвращает { width, height }, чтобы вызывающий код
+// мог сдвинуть курсор вниз на её реальный размер.
+function drawPill(ctx, text, x, y, { font, textColor, bgColor, paddingX, paddingY }) {
+    ctx.font = font;
+    const w = ctx.measureText(text).width + paddingX * 2;
+    const size = parseInt(font.match(/(\d+)px/)[1], 10);
+    const h = size + paddingY * 2;
+
+    ctx.fillStyle = bgColor;
+    roundRect(ctx, x, y, w, h, h / 2);
+    ctx.fill();
+
+    ctx.fillStyle = textColor;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + paddingX, y + h / 2 + 2);
+    ctx.textBaseline = 'alphabetic';
+
+    return { width: w, height: h };
+}
+
+function truncateToWidth(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) {
+        return text;
+    }
+    let cut = text;
+    while (cut.length > 1 && ctx.measureText(`${cut}…`).width > maxWidth) {
+        cut = cut.slice(0, -1);
+    }
+    return `${cut}…`;
+}
+
+// ui-rounded — генерик-семейство CSS Fonts Level 4: в мобильном
+// Safari (а именно там чаще всего и открывают "Поделиться" в Instagram)
+// это SF Rounded — тот самый дружелюбный закруглённый жирный шрифт, каким
+// пользуются GoFundMe/Instagram-сторис. На платформах, где браузер его не
+// знает, спецификация требует просто пропустить неизвестное имя и уйти
+// дальше по списку — падать некуда, а не подключать веб-шрифт ради Canvas.
+const STORY_FONT = 'ui-rounded, -apple-system, "Helvetica Neue", Arial, sans-serif';
+const STORY_INK = '#1c1917';
+const STORY_AMBER = '#fbbf24';
+
+// Размеры блоков в одном месте: используются и чтобы заранее посчитать
+// суммарную высоту контента (для вертикального центрирования — заголовок
+// на 1–3 строки, высота блока каждый раз разная), и чтобы реально
+// нарисовать те же элементы тем же шрифтом/паддингами. Дублировать эти
+// числа во втором проходе — верный способ рассинхронизировать расчёт
+// с отрисовкой.
+const STORY_BRAND_BLOCK = 96;
+const STORY_CAT = { fontSize: 32, padX: 28, padY: 16, gapAfter: 44 };
+const STORY_TITLE = { fontSize: 84, lineHeight: 94, gapAfter: 56 };
+const STORY_STAT = { fontSize: 48, padX: 32, padY: 22, gapAfter: 44 };
+const STORY_BAR = { height: 26, gapAfter: 50 };
+const STORY_GOAL_BLOCK = 82;
+const STORY_CTA = { fontSize: 46, padX: 40, padY: 24, gapAfter: 36 };
+const STORY_URL_BLOCK = 40;
+const STORY_TOP_SAFE = 220; // не залезать под иконки редактора Instagram сверху
+const STORY_BOTTOM_SAFE = 260; // и под панель подписи/стикеров снизу
+
 async function buildStoryImage() {
     const width = 1080;
     const height = 1920;
+    const pad = 72;
+    const contentWidth = width - pad * 2;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -103,9 +164,14 @@ async function buildStoryImage() {
     if (props.case.photoUrl) {
         const img = await loadImage(props.case.photoUrl);
         drawImageCover(ctx, img, 0, 0, width, height);
-        const overlay = ctx.createLinearGradient(0, height * 0.35, 0, height);
-        overlay.addColorStop(0, 'rgba(12, 10, 9, 0)');
-        overlay.addColorStop(1, 'rgba(12, 10, 9, 0.92)');
+        // Ровный тёмный тон по всей фотографии (иначе верхний брендинг
+        // на светлом небе/фоне нечитаем) плюс более тёмный градиент снизу,
+        // где сидит самый важный текст — сумма, прогресс, кнопка.
+        ctx.fillStyle = 'rgba(10, 9, 8, 0.32)';
+        ctx.fillRect(0, 0, width, height);
+        const overlay = ctx.createLinearGradient(0, height * 0.32, 0, height);
+        overlay.addColorStop(0, 'rgba(10, 9, 8, 0)');
+        overlay.addColorStop(1, 'rgba(10, 9, 8, 0.88)');
         ctx.fillStyle = overlay;
         ctx.fillRect(0, 0, width, height);
     } else {
@@ -116,42 +182,99 @@ async function buildStoryImage() {
         ctx.fillRect(0, 0, width, height);
     }
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '600 40px system-ui, sans-serif';
-    ctx.fillText('ElimBar', 64, 96);
-    ctx.font = '400 28px system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText('Элим, барсыңбы?!', 64, 136);
+    // Заголовок переносится по словам в зависимости от реальной ширины
+    // текста (кириллица непредсказуема по числу символов), поэтому число
+    // строк — а значит и общая высота блока — известно только после
+    // wrapText. Считаем её один раз и центрируем блок по вертикали:
+    // иначе при коротком заголовке контент повисает у самого верха с
+    // пустым низом, а при длинном рискует не влезть в безопасную зону.
+    ctx.font = `900 ${STORY_TITLE.fontSize}px ${STORY_FONT}`;
+    const titleLines = wrapText(ctx, pickLocale(props.case.title, locale()), contentWidth, 3);
 
-    ctx.font = '700 32px system-ui, sans-serif';
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillText(categoryLabel(props.case.category).toUpperCase(), 64, height - 620);
+    const catPillHeight = STORY_CAT.fontSize + STORY_CAT.padY * 2;
+    const statPillHeight = STORY_STAT.fontSize + STORY_STAT.padY * 2;
+    const ctaPillHeight = STORY_CTA.fontSize + STORY_CTA.padY * 2;
+    const totalHeight = STORY_BRAND_BLOCK
+        + catPillHeight + STORY_CAT.gapAfter
+        + titleLines.length * STORY_TITLE.lineHeight + STORY_TITLE.gapAfter
+        + statPillHeight + STORY_STAT.gapAfter
+        + STORY_BAR.height + STORY_BAR.gapAfter
+        + STORY_GOAL_BLOCK
+        + ctaPillHeight + STORY_CTA.gapAfter
+        + STORY_URL_BLOCK;
+
+    const idealStart = (height - totalHeight) / 2;
+    let cursorY = Math.min(
+        Math.max(idealStart, STORY_TOP_SAFE),
+        height - STORY_BOTTOM_SAFE - totalHeight,
+    );
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '700 64px system-ui, sans-serif';
-    const titleLines = wrapText(ctx, pickLocale(props.case.title, locale()), width - 128, 3);
-    let ty = height - 540;
-    titleLines.forEach((line) => {
-        ctx.fillText(line, 64, ty);
-        ty += 74;
+    ctx.font = `800 46px ${STORY_FONT}`;
+    ctx.fillText('ElimBar', pad, cursorY);
+    cursorY += STORY_BRAND_BLOCK;
+
+    const catPill = drawPill(ctx, categoryLabel(props.case.category).toUpperCase(), pad, cursorY, {
+        font: `800 ${STORY_CAT.fontSize}px ${STORY_FONT}`,
+        textColor: STORY_INK,
+        bgColor: STORY_AMBER,
+        paddingX: STORY_CAT.padX,
+        paddingY: STORY_CAT.padY,
     });
+    cursorY += catPill.height + STORY_CAT.gapAfter;
 
-    const barY = height - 300;
-    const barW = width - 128;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-    roundRect(ctx, 64, barY, barW, 16, 8);
-    ctx.fill();
-    ctx.fillStyle = '#fbbf24';
-    roundRect(ctx, 64, barY, barW * (progressPercent() / 100), 16, 8);
-    ctx.fill();
-
-    ctx.font = '500 34px system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${formatSom(props.case.allocated_minor)} из ${formatSom(props.case.budget_minor)}`, 64, barY + 60);
+    ctx.font = `900 ${STORY_TITLE.fontSize}px ${STORY_FONT}`;
+    titleLines.forEach((line) => {
+        cursorY += STORY_TITLE.lineHeight;
+        ctx.fillText(line, pad, cursorY);
+    });
+    cursorY += STORY_TITLE.gapAfter;
 
-    ctx.font = '600 36px system-ui, sans-serif';
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillText(`Поддержать → ${shareUrl.value.replace(/^https?:\/\//, '')}`, 64, height - 80);
+    const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor)} собрано`, pad, cursorY, {
+        font: `800 ${STORY_STAT.fontSize}px ${STORY_FONT}`,
+        textColor: STORY_INK,
+        bgColor: STORY_AMBER,
+        paddingX: STORY_STAT.padX,
+        paddingY: STORY_STAT.padY,
+    });
+    cursorY += statPill.height + STORY_STAT.gapAfter;
+
+    const barH = STORY_BAR.height;
+    ctx.font = `800 52px ${STORY_FONT}`;
+    const percentText = `${progressPercent()}%`;
+    const percentWidth = ctx.measureText(percentText).width;
+    const barW = contentWidth - percentWidth - 28;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    roundRect(ctx, pad, cursorY, barW, barH, barH / 2);
+    ctx.fill();
+    ctx.fillStyle = STORY_AMBER;
+    roundRect(ctx, pad, cursorY, barW * (progressPercent() / 100), barH, barH / 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(percentText, pad + barW + 28, cursorY + barH / 2 + 2);
+    ctx.textBaseline = 'alphabetic';
+    cursorY += barH + STORY_BAR.gapAfter;
+
+    ctx.font = `600 34px ${STORY_FONT}`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText(`Цель — ${formatSom(props.case.budget_minor)}`, pad, cursorY);
+    cursorY += STORY_GOAL_BLOCK;
+
+    const ctaPill = drawPill(ctx, 'Поддержать →', pad, cursorY, {
+        font: `800 ${STORY_CTA.fontSize}px ${STORY_FONT}`,
+        textColor: STORY_INK,
+        bgColor: STORY_AMBER,
+        paddingX: STORY_CTA.padX,
+        paddingY: STORY_CTA.padY,
+    });
+    cursorY += ctaPill.height + STORY_CTA.gapAfter;
+
+    ctx.font = `500 28px ${STORY_FONT}`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    const urlText = shareUrl.value.replace(/^https?:\/\//, '');
+    ctx.fillText(truncateToWidth(ctx, urlText, contentWidth), pad, cursorY);
 
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 }
