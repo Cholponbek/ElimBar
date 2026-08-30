@@ -21,6 +21,7 @@ const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.shar
 const categoryLabel = (category) => ({
     medical: 'Лечение',
     winter_food: 'Зимняя продуктовая помощь',
+    fund_project: 'Проект фонда',
 }[category] ?? category);
 
 const progressPercent = () =>
