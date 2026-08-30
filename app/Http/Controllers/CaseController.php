@@ -8,6 +8,8 @@ use App\Models\Donor;
 use App\Models\PublicCase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,6 +28,10 @@ class CaseController extends Controller
             ->orderByDesc('created_at')
             ->get()
             ->map($this->presentCase(...));
+
+        $this->shareMeta([
+            'description' => 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.',
+        ]);
 
         return Inertia::render('Cases/Index', [
             'cases' => $cases,
@@ -69,8 +75,18 @@ class CaseController extends Controller
             ];
         });
 
+        $presented = $this->presentCase($case);
+
+        $this->shareMeta([
+            'type' => 'article',
+            'title' => $this->pickLocale($case->public_title, app()->getLocale()),
+            'description' => Str::limit($this->pickLocale($case->public_story, app()->getLocale()) ?: 'Помогите собрать на этот кейс — каждый сом виден в публичном отчёте.', 160),
+            'image' => $presented['photoUrl'],
+            'url' => url()->current(),
+        ]);
+
         return Inertia::render('Cases/Show', [
-            'case' => $this->presentCase($case),
+            'case' => $presented,
             'recentDonations' => $recentDonations,
         ]);
     }
@@ -78,6 +94,33 @@ class CaseController extends Controller
     private function maskPhone(string $phone): string
     {
         return '•••• '.substr($phone, -3);
+    }
+
+    /**
+     * Open Graph/Twitter Card теги для превью при шаринге (Instagram Stories,
+     * Telegram, WhatsApp, Facebook — все читают og:* из самого первого,
+     * ещё не гидрированного HTML-ответа). Inertia не рендерит SSR в этом
+     * проекте, поэтому Vue-компонент <Head> здесь бесполезен: краулеры не
+     * выполняют JS и никогда не увидят то, что он допишет в <head> после
+     * гидратации. View::share кладёт данные в общий пул переменных Blade,
+     * который resources/views/app.blade.php читает при каждом полном
+     * рендере страницы (и Inertia, и обычный первый заход используют один
+     * и тот же root-шаблон).
+     *
+     * @param  array{type?: string, title?: string, description?: string, image?: ?string, url?: string}  $meta
+     */
+    private function shareMeta(array $meta): void
+    {
+        View::share('meta', $meta);
+    }
+
+    private function pickLocale(?array $value, string $locale, string $fallback = 'ru'): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return $value[$locale] ?? $value[$fallback] ?? reset($value) ?: null;
     }
 
     private function presentCase(PublicCase $case): array

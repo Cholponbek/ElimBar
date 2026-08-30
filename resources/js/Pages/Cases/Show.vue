@@ -1,4 +1,5 @@
 <script setup>
+import { computed, ref } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import { formatSom, pickLocale } from '../../money.js';
@@ -11,6 +12,37 @@ const props = defineProps({
 const page = usePage();
 const locale = () => page.props.locale;
 const flashSuccess = () => page.props.flash?.success;
+
+// Ссылка на конкретный кейс — то, чем реально делятся. Инстаграм не даёт
+// сайту напрямую опубликовать пост/сторис через URL (в отличие от Telegram/
+// WhatsApp), поэтому для него единственный путь — системное меню "Поделиться"
+// на телефоне (canNativeShare ниже): оно само предложит Instagram среди
+// приложений, а превью (фото/заголовок) возьмёт из og:* тегов страницы.
+const shareUrl = computed(() => (typeof window !== 'undefined' ? window.location.href : ''));
+const shareTitle = computed(() => pickLocale(props.case.title, locale()));
+const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+async function nativeShare() {
+    try {
+        await navigator.share({ title: shareTitle.value, url: shareUrl.value });
+    } catch {
+        // Пользователь закрыл системное меню — не ошибка.
+    }
+}
+
+const telegramShareUrl = computed(
+    () => `https://t.me/share/url?url=${encodeURIComponent(shareUrl.value)}&text=${encodeURIComponent(shareTitle.value)}`,
+);
+const whatsappShareUrl = computed(
+    () => `https://wa.me/?text=${encodeURIComponent(shareTitle.value + ' ' + shareUrl.value)}`,
+);
+
+const linkCopied = ref(false);
+async function copyLink() {
+    await navigator.clipboard.writeText(shareUrl.value);
+    linkCopied.value = true;
+    setTimeout(() => (linkCopied.value = false), 2000);
+}
 
 const categoryLabel = (category) => ({
     medical: 'Лечение',
@@ -50,6 +82,40 @@ function submit() {
         <h1 class="mt-2 text-xl font-semibold leading-snug sm:text-2xl">
             {{ pickLocale(props.case.title, locale()) }}
         </h1>
+
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+            <button
+                v-if="canNativeShare"
+                type="button"
+                class="rounded-lg bg-stone-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-stone-700"
+                @click="nativeShare"
+            >
+                Поделиться
+            </button>
+            <a
+                :href="telegramShareUrl"
+                target="_blank"
+                rel="noopener"
+                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+            >
+                Telegram
+            </a>
+            <a
+                :href="whatsappShareUrl"
+                target="_blank"
+                rel="noopener"
+                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+            >
+                WhatsApp
+            </a>
+            <button
+                type="button"
+                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+                @click="copyLink"
+            >
+                {{ linkCopied ? 'Ссылка скопирована' : 'Скопировать ссылку' }}
+            </button>
+        </div>
 
         <img
             v-if="props.case.photoUrl"
