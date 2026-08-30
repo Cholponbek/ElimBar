@@ -214,6 +214,8 @@ const formatDate = (isoString) =>
 const form = useForm({
     phone: '',
     amount: 500,
+    name: '',
+    show_name_publicly: false,
 });
 
 const presetAmounts = [200, 500, 1000, 5000];
@@ -352,6 +354,21 @@ function submit() {
                             <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
                         </div>
 
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Имя (необязательно)</label>
+                            <input
+                                v-model="form.name"
+                                type="text"
+                                placeholder="Как к вам обращаться"
+                                class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                            />
+                            <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
+                            <label class="mt-2 flex items-center gap-2 text-sm text-stone-600">
+                                <input v-model="form.show_name_publicly" type="checkbox" class="rounded border-stone-300 text-amber-500 focus:ring-amber-500" />
+                                Показывать моё имя в списке донатов вместо номера телефона
+                            </label>
+                        </div>
+
                         <button
                             type="submit"
                             :disabled="form.processing"
@@ -375,7 +392,7 @@ function submit() {
                         >
                             <span class="flex flex-col">
                                 <span class="text-stone-400">{{ formatDate(donation.created_at) }}</span>
-                                <span v-if="donation.donorPhoneMasked" class="text-xs text-stone-400">{{ donation.donorPhoneMasked }}</span>
+                                <span v-if="donation.donorDisplay" class="text-xs text-stone-400">{{ donation.donorDisplay }}</span>
                             </span>
                             <span class="font-medium">{{ formatSom(donation.amount_minor) }}</span>
                         </li>

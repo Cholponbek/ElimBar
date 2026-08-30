@@ -59,19 +59,21 @@ class CaseController extends Controller
             ->get(['id', 'donor_id'])
             ->keyBy('id');
 
-        $donorPhones = Donor::on('pgsql_public')
+        $donors = Donor::on('pgsql_public')
             ->whereIn('id', $donations->pluck('donor_id'))
-            ->get(['id', 'phone'])
+            ->get(['id', 'phone', 'name', 'show_name_publicly'])
             ->keyBy('id')
-            ->map(fn (Donor $donor) => $this->maskPhone($donor->phone));
+            ->map(fn (Donor $donor) => $donor->show_name_publicly && filled($donor->name)
+                ? $donor->name
+                : $this->maskPhone($donor->phone));
 
-        $recentDonations = $allocations->map(function (Allocation $allocation) use ($donations, $donorPhones) {
+        $recentDonations = $allocations->map(function (Allocation $allocation) use ($donations, $donors) {
             $donorId = $donations->get($allocation->donation_id)?->donor_id;
 
             return [
                 'amount_minor' => $allocation->amount_minor,
                 'created_at' => $allocation->created_at,
-                'donorPhoneMasked' => $donorId ? $donorPhones->get($donorId) : null,
+                'donorDisplay' => $donorId ? $donors->get($donorId) : null,
             ];
         });
 
@@ -91,9 +93,25 @@ class CaseController extends Controller
         ]);
     }
 
+    /**
+     * "•••• 367" читалось как случайный набор символов, было непонятно,
+     * что это вообще номер телефона. +996 XXX ****XX (код страны и
+     * оператор открыты, абонентский номер замаскирован кроме двух
+     * последних цифр) — сразу видно формат, но узнать конкретный номер
+     * по-прежнему нельзя.
+     */
     private function maskPhone(string $phone): string
     {
-        return '•••• '.substr($phone, -3);
+        $digits = preg_replace('/\D/', '', $phone);
+
+        if (str_starts_with($digits, '996') && strlen($digits) === 12) {
+            $operator = substr($digits, 3, 3);
+            $lastTwo = substr($digits, -2);
+
+            return "+996 {$operator} ****{$lastTwo}";
+        }
+
+        return '**** '.substr($digits, -2);
     }
 
     /**
