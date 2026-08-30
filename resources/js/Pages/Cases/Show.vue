@@ -142,9 +142,12 @@ function submit() {
                         <li
                             v-for="(donation, index) in recentDonations"
                             :key="index"
-                            class="flex justify-between text-sm text-stone-600"
+                            class="flex items-center justify-between text-sm text-stone-600"
                         >
-                            <span class="text-stone-400">{{ formatDate(donation.created_at) }}</span>
+                            <span class="flex flex-col">
+                                <span class="text-stone-400">{{ formatDate(donation.created_at) }}</span>
+                                <span v-if="donation.donorPhoneMasked" class="text-xs text-stone-400">{{ donation.donorPhoneMasked }}</span>
+                            </span>
                             <span class="font-medium">{{ formatSom(donation.amount_minor) }}</span>
                         </li>
                     </ul>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Allocation;
+use App\Models\Donation;
+use App\Models\Donor;
 use App\Models\PublicCase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,22 +36,48 @@ class CaseController extends Controller
     {
         $case = PublicCase::query()->where('status', 'active')->findOrFail($case);
 
-        // Только сумма и дата — донор не выбирает публичность, поэтому
-        // телефон здесь не показываем никому, ни при каких условиях.
-        $recentDonations = Allocation::on('pgsql_public')
+        // Телефон донора показываем замаскированным (только последние 3
+        // цифры) — не полностью анонимно, но и не так, чтобы кто-то мог
+        // прочитать чужой номер целиком с публичной страницы. Отдельные
+        // запросы на каждую модель через pgsql_public, не ->with() —
+        // eager-load не даёт гарантии, каким connection пойдёт связанная
+        // модель, а здесь это должно быть явно app_public, не app_staff.
+        $allocations = Allocation::on('pgsql_public')
             ->where('case_id', $case->id)
             ->orderByDesc('created_at')
             ->limit(10)
-            ->get(['amount_minor', 'created_at'])
-            ->map(fn (Allocation $allocation) => [
+            ->get(['donation_id', 'amount_minor', 'created_at']);
+
+        $donations = Donation::on('pgsql_public')
+            ->whereIn('id', $allocations->pluck('donation_id'))
+            ->get(['id', 'donor_id'])
+            ->keyBy('id');
+
+        $donorPhones = Donor::on('pgsql_public')
+            ->whereIn('id', $donations->pluck('donor_id'))
+            ->get(['id', 'phone'])
+            ->keyBy('id')
+            ->map(fn (Donor $donor) => $this->maskPhone($donor->phone));
+
+        $recentDonations = $allocations->map(function (Allocation $allocation) use ($donations, $donorPhones) {
+            $donorId = $donations->get($allocation->donation_id)?->donor_id;
+
+            return [
                 'amount_minor' => $allocation->amount_minor,
                 'created_at' => $allocation->created_at,
-            ]);
+                'donorPhoneMasked' => $donorId ? $donorPhones->get($donorId) : null,
+            ];
+        });
 
         return Inertia::render('Cases/Show', [
             'case' => $this->presentCase($case),
             'recentDonations' => $recentDonations,
         ]);
+    }
+
+    private function maskPhone(string $phone): string
+    {
+        return '•••• '.substr($phone, -3);
     }
 
     private function presentCase(PublicCase $case): array
