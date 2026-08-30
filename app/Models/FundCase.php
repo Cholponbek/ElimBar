@@ -27,8 +27,8 @@ class FundCase extends Model
 
     protected $fillable = [
         'request_id', 'campaign_id', 'beneficiary_id', 'category', 'status',
-        'public_title', 'public_story', 'public_photo_id', 'currency',
-        'budget_minor', 'allows_zakat', 'closed_at',
+        'public_title', 'public_story', 'public_photo_id', 'public_photo_path',
+        'currency', 'budget_minor', 'allows_zakat', 'closed_at',
     ];
 
     protected $casts = [

@@ -32,22 +32,30 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                 v-for="c in cases"
                 :key="c.id"
                 :href="`/cases/${c.id}`"
-                class="block rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                class="block overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm transition hover:shadow-md"
             >
-                <div class="text-xs font-medium uppercase tracking-wide text-amber-600">
-                    {{ categoryLabel(c.category) }}
-                </div>
-                <h2 class="mt-2 text-lg font-semibold leading-snug">
-                    {{ pickLocale(c.title, locale()) }}
-                </h2>
-
-                <div class="mt-4">
-                    <div class="h-2 overflow-hidden rounded-full bg-stone-100">
-                        <div class="h-full bg-amber-500" :style="{ width: progress(c) + '%' }" />
+                <img
+                    v-if="c.photoUrl"
+                    :src="c.photoUrl"
+                    :alt="pickLocale(c.title, locale())"
+                    class="aspect-video w-full object-cover"
+                />
+                <div class="p-5">
+                    <div class="text-xs font-medium uppercase tracking-wide text-amber-600">
+                        {{ categoryLabel(c.category) }}
                     </div>
-                    <div class="mt-2 flex justify-between text-sm text-stone-500">
-                        <span>{{ formatSom(c.allocated_minor) }} собрано</span>
-                        <span>из {{ formatSom(c.budget_minor) }}</span>
+                    <h2 class="mt-2 text-lg font-semibold leading-snug">
+                        {{ pickLocale(c.title, locale()) }}
+                    </h2>
+
+                    <div class="mt-4">
+                        <div class="h-2 overflow-hidden rounded-full bg-stone-100">
+                            <div class="h-full bg-amber-500" :style="{ width: progress(c) + '%' }" />
+                        </div>
+                        <div class="mt-2 flex justify-between text-sm text-stone-500">
+                            <span>{{ formatSom(c.allocated_minor) }} собрано</span>
+                            <span>из {{ formatSom(c.budget_minor) }}</span>
+                        </div>
                     </div>
                 </div>
             </Link>
