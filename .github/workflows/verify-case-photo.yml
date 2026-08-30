@@ -100,7 +100,7 @@ jobs:
             const editHref = await firstEditLink.getAttribute('href');
             console.log('EDIT_HREF:', editHref);
 
-            await page.goto(BASE + editHref, { waitUntil: 'load', timeout: 30000 });
+            await page.goto(editHref, { waitUntil: 'load', timeout: 30000 });
             await page.waitForTimeout(1500);
 
             const fileInput = page.locator('input[type="file"]');
