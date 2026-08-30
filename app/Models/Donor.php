@@ -15,10 +15,11 @@ class Donor extends Model
 {
     use BelongsToTenant, HasFactory;
 
-    protected $fillable = ['phone', 'name', 'email', 'locale', 'phone_verified_at'];
+    protected $fillable = ['phone', 'name', 'email', 'locale', 'phone_verified_at', 'show_name_publicly'];
 
     protected $casts = [
         'phone_verified_at' => 'datetime',
+        'show_name_publicly' => 'boolean',
     ];
 
     public function donations(): HasMany
