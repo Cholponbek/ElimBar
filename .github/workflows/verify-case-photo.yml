@@ -137,6 +137,22 @@ jobs:
               }
             }
 
+            // Full snapshot: every case's status in the admin table.
+            await page.goto(BASE + '/admin/fund-cases', { waitUntil: 'load', timeout: 30000 });
+            await page.waitForTimeout(1500);
+            const rows = await page.locator('table tbody tr').evaluateAll((trs) =>
+              trs.map((tr) => tr.innerText.replace(/\n/g, ' | '))
+            );
+            console.log('ADMIN_FUND_CASES_TABLE:');
+            rows.forEach((r) => console.log('  ' + r));
+
+            // Full snapshot: public index page's case list.
+            await page.goto(BASE + '/', { waitUntil: 'load', timeout: 30000 });
+            await page.waitForTimeout(1000);
+            const publicBody = await page.textContent('body').catch(() => '');
+            const publicTitles = await page.locator('h2').evaluateAll((els) => els.map((el) => el.textContent.trim()));
+            console.log('PUBLIC_INDEX_TITLES:', JSON.stringify(publicTitles));
+
             await browser.close();
           })();
           SCRIPT
