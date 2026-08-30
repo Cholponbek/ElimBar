@@ -76,13 +76,26 @@ class DemoSeeder extends Seeder
                 'allocated' => 42_000_00,
                 'allows_zakat' => false,
             ],
+            [
+                // Проект фонда — не про одного конкретного человека, поэтому
+                // без бенефициара (см. миграцию make_cases_beneficiary_id_nullable).
+                'category' => 'fund_project',
+                'title' => ['ky' => 'Жетим балдарга мектеп формасы', 'ru' => 'Школьная форма для детей-сирот'],
+                'story' => [
+                    'ky' => 'Фонддун өз демилгеси: жаңы окуу жылына 40 жетим балага мектеп формасы жана буюмдар.',
+                    'ru' => 'Собственная инициатива фонда: школьная форма и канцелярия к новому учебному году для 40 детей-сирот.',
+                ],
+                'budget' => 200_000_00,
+                'allocated' => 54_000_00,
+                'allows_zakat' => false,
+            ],
         ];
 
         foreach ($cases as $data) {
-            $beneficiary = Beneficiary::factory()->create();
+            $beneficiary = $data['category'] === 'fund_project' ? null : Beneficiary::factory()->create();
 
             $case = FundCase::create([
-                'beneficiary_id' => $beneficiary->id,
+                'beneficiary_id' => $beneficiary?->id,
                 'category' => $data['category'],
                 'status' => $data['status'] ?? 'active',
                 'public_title' => $data['title'],

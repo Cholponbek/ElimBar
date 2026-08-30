@@ -13,6 +13,7 @@ const locale = () => page.props.locale;
 const categoryLabel = (category) => ({
     medical: 'Лечение',
     winter_food: 'Зимняя продуктовая помощь',
+    fund_project: 'Проект фонда',
 }[category] ?? category);
 
 const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.allocated_minor / c.budget_minor) * 100)) : 0);

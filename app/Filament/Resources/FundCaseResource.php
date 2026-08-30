@@ -38,23 +38,33 @@ class FundCaseResource extends Resource
                 Forms\Components\Section::make('Бенефициар и категория')
                     ->columns(2)
                     ->schema([
-                        Forms\Components\Select::make('beneficiary_id')
-                            ->label('Бенефициар')
-                            ->relationship('beneficiary', 'full_name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('full_name')->label('ФИО')->required(),
-                                Forms\Components\TextInput::make('phone')->label('Телефон')->tel(),
-                            ]),
                         Forms\Components\Select::make('category')
                             ->label('Категория')
                             ->options([
                                 'medical' => 'Лечение',
                                 'winter_food' => 'Зимняя продуктовая помощь',
+                                'fund_project' => 'Проект фонда',
                             ])
+                            ->helperText('«Проект фонда» — собственный сбор фонда/донора (не про одного конкретного человека), бенефициар не нужен.')
+                            ->live()
                             ->required(),
+                        // Проект фонда — это не про одного человека (форма для
+                        // сирот, помощь малоимущим семьям), поэтому для него
+                        // поле скрыто и не обязательно; cases.beneficiary_id
+                        // сделан nullable именно под этот случай, см. миграцию
+                        // 2026_08_30_120000_make_cases_beneficiary_id_nullable.
+                        Forms\Components\Select::make('beneficiary_id')
+                            ->label('Бенефициар')
+                            ->relationship('beneficiary', 'full_name')
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (Forms\Get $get) => $get('category') !== 'fund_project')
+                            ->required(fn (Forms\Get $get) => $get('category') !== 'fund_project')
+                            ->dehydrated(fn (Forms\Get $get) => $get('category') !== 'fund_project')
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('full_name')->label('ФИО')->required(),
+                                Forms\Components\TextInput::make('phone')->label('Телефон')->tel(),
+                            ]),
                     ]),
 
                 Forms\Components\Section::make('Публичная карточка')
@@ -121,12 +131,14 @@ class FundCaseResource extends Resource
                     ->searchable()
                     ->limit(40),
                 Tables\Columns\TextColumn::make('beneficiary.full_name')
-                    ->label('Бенефициар'),
+                    ->label('Бенефициар')
+                    ->placeholder('— проект фонда —'),
                 Tables\Columns\TextColumn::make('category')
                     ->label('Категория')
                     ->formatStateUsing(fn (string $state) => match ($state) {
                         'medical' => 'Лечение',
                         'winter_food' => 'Зимняя продуктовая помощь',
+                        'fund_project' => 'Проект фонда',
                         default => $state,
                     }),
                 Tables\Columns\BadgeColumn::make('status')
