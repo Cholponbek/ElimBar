@@ -27,6 +27,10 @@
     <meta name="twitter:title" content="{{ $meta['title'] ?? config('app.name', 'ElimBar') }}">
     <meta name="twitter:description" content="{{ $meta['description'] ?? 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.' }}">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead
 </head>

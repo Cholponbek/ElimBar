@@ -132,8 +132,12 @@ function truncateToWidth(ctx, text, maxWidth) {
 // знает, спецификация требует просто пропустить неизвестное имя и уйти
 // дальше по списку — падать некуда, а не подключать веб-шрифт ради Canvas.
 const STORY_FONT = 'ui-rounded, -apple-system, "Helvetica Neue", Arial, sans-serif';
-const STORY_INK = '#1c1917';
-const STORY_AMBER = '#fbbf24';
+// Плашки — фирменный ярко-голубой (Pantone 801 C), тёмно-синий текст:
+// та же логика, что была у янтарного варианта (яркий цвет — тёмный текст,
+// чтобы читалось поверх тёмного градиента на фото), просто в рамках трёх
+// фирменных синих без стороннего акцента — сайт теперь строго на них.
+const STORY_INK = '#0201a3';
+const STORY_ACCENT = '#00ade6';
 
 // Размеры блоков в одном месте: используются и чтобы заранее посчитать
 // суммарную высоту контента (для вертикального центрирования — заголовок
@@ -177,8 +181,8 @@ async function buildStoryImage() {
         ctx.fillRect(0, 0, width, height);
     } else {
         const bg = ctx.createLinearGradient(0, 0, width, height);
-        bg.addColorStop(0, '#f59e0b');
-        bg.addColorStop(1, '#b45309');
+        bg.addColorStop(0, '#0087D2');
+        bg.addColorStop(1, '#0201A3');
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, width, height);
     }
@@ -218,7 +222,7 @@ async function buildStoryImage() {
     const catPill = drawPill(ctx, categoryLabel(props.case.category).toUpperCase(), pad, cursorY, {
         font: `800 ${STORY_CAT.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
-        bgColor: STORY_AMBER,
+        bgColor: STORY_ACCENT,
         paddingX: STORY_CAT.padX,
         paddingY: STORY_CAT.padY,
     });
@@ -235,7 +239,7 @@ async function buildStoryImage() {
     const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor)} собрано`, pad, cursorY, {
         font: `800 ${STORY_STAT.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
-        bgColor: STORY_AMBER,
+        bgColor: STORY_ACCENT,
         paddingX: STORY_STAT.padX,
         paddingY: STORY_STAT.padY,
     });
@@ -249,7 +253,7 @@ async function buildStoryImage() {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     roundRect(ctx, pad, cursorY, barW, barH, barH / 2);
     ctx.fill();
-    ctx.fillStyle = STORY_AMBER;
+    ctx.fillStyle = STORY_ACCENT;
     roundRect(ctx, pad, cursorY, barW * (progressPercent() / 100), barH, barH / 2);
     ctx.fill();
     ctx.fillStyle = '#ffffff';
@@ -266,7 +270,7 @@ async function buildStoryImage() {
     const ctaPill = drawPill(ctx, 'Поддержать →', pad, cursorY, {
         font: `800 ${STORY_CTA.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
-        bgColor: STORY_AMBER,
+        bgColor: STORY_ACCENT,
         paddingX: STORY_CTA.padX,
         paddingY: STORY_CTA.padY,
     });
@@ -354,12 +358,12 @@ function submit() {
 
 <template>
     <PublicLayout>
-        <Link href="/" class="text-sm text-stone-500 hover:text-stone-700">&larr; Все кейсы</Link>
+        <Link href="/" class="text-sm text-[#5B6472] hover:text-brand-navy">&larr; Все кейсы</Link>
 
-        <div class="mt-4 text-xs font-medium uppercase tracking-wide text-amber-600">
+        <div class="font-heading mt-4 text-xs font-bold uppercase tracking-wider text-brand-cyan">
             {{ categoryLabel(props.case.category) }}
         </div>
-        <h1 class="mt-2 text-xl font-semibold leading-snug sm:text-2xl">
+        <h1 class="font-heading mt-2 text-xl font-bold leading-snug text-brand-navy sm:text-2xl">
             {{ pickLocale(props.case.title, locale()) }}
         </h1>
 
@@ -368,7 +372,7 @@ function submit() {
                 v-if="canNativeShare"
                 type="button"
                 :disabled="sharingImage"
-                class="rounded-lg bg-stone-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
+                class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
                 @click="nativeShare"
             >
                 {{ sharingImage ? 'Готовим карточку…' : 'Поделиться' }}
@@ -376,7 +380,7 @@ function submit() {
             <button
                 type="button"
                 :disabled="downloadingImage"
-                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300 disabled:opacity-60"
+                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
                 @click="downloadStoryCard"
             >
                 {{ downloadingImage ? 'Готовим…' : 'Скачать карточку для Stories' }}
@@ -385,7 +389,7 @@ function submit() {
                 :href="telegramShareUrl"
                 target="_blank"
                 rel="noopener"
-                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
             >
                 Telegram
             </a>
@@ -393,13 +397,13 @@ function submit() {
                 :href="whatsappShareUrl"
                 target="_blank"
                 rel="noopener"
-                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
             >
                 WhatsApp
             </a>
             <button
                 type="button"
-                class="rounded-lg border border-stone-200 px-3 py-1.5 text-sm text-stone-600 transition hover:border-stone-300"
+                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
                 @click="copyLink"
             >
                 {{ linkCopied ? 'Ссылка скопирована' : 'Скопировать ссылку' }}
@@ -410,28 +414,31 @@ function submit() {
             v-if="props.case.photoUrl"
             :src="props.case.photoUrl"
             :alt="pickLocale(props.case.title, locale())"
-            class="mt-6 aspect-video w-full rounded-xl object-cover"
+            class="mt-6 aspect-video w-full rounded-[10px] object-cover"
         />
 
         <div class="mt-8 grid gap-6 sm:grid-cols-3">
             <div class="sm:col-span-2">
-                <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-stone-700">
+                <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
                     {{ pickLocale(props.case.story, locale()) }}
                 </p>
-                <p v-else class="text-stone-400">Подробностей пока нет.</p>
+                <p v-else class="text-[#8B94A3]">Подробностей пока нет.</p>
             </div>
 
             <div class="sm:col-span-1">
-                <div class="rounded-xl border border-stone-200 bg-white p-4 sm:p-5">
-                    <div class="h-2 overflow-hidden rounded-full bg-stone-100">
-                        <div class="h-full bg-amber-500" :style="{ width: progressPercent() + '%' }" />
+                <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
+                            <div class="h-full bg-brand-navy" :style="{ width: progressPercent() + '%' }" />
+                        </div>
+                        <span class="font-heading text-sm font-bold text-brand-navy">{{ progressPercent() }}%</span>
                     </div>
-                    <div class="mt-2 flex flex-col gap-1 text-sm text-stone-500 sm:flex-row sm:justify-between">
-                        <span>{{ formatSom(props.case.allocated_minor) }} собрано</span>
-                        <span>из {{ formatSom(props.case.budget_minor) }}</span>
+                    <div class="mt-2 flex flex-col gap-1 text-sm text-[#5B6472] sm:flex-row sm:justify-between">
+                        <span>Собрано <b class="text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
+                        <span>Цель <b class="text-[#101318]">{{ formatSom(props.case.budget_minor) }}</b></span>
                     </div>
 
-                    <div class="mt-3 text-sm text-stone-500">
+                    <div class="mt-3 text-sm text-[#8B94A3]">
                         Выплачено по кейсу: {{ formatSom(props.case.disbursed_minor) }}
                     </div>
 
@@ -441,16 +448,16 @@ function submit() {
 
                     <form class="mt-6 space-y-4" @submit.prevent="submit">
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Сумма, сом</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Сумма, сом</label>
                             <div class="flex flex-wrap gap-2">
                                 <button
                                     v-for="preset in presetAmounts"
                                     :key="preset"
                                     type="button"
-                                    class="rounded-lg border px-3 py-1.5 text-sm transition"
+                                    class="font-heading rounded-lg border px-3 py-1.5 text-sm font-bold transition"
                                     :class="form.amount === preset
-                                        ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                        : 'border-stone-200 text-stone-600 hover:border-stone-300'"
+                                        ? 'border-brand-navy bg-[#EEF0FB] text-brand-navy'
+                                        : 'border-[#DCE6F0] text-[#5B6472] hover:border-brand-cyan'"
                                     @click="form.amount = preset"
                                 >
                                     {{ preset.toLocaleString('ru-RU') }}
@@ -461,34 +468,34 @@ function submit() {
                                 type="number"
                                 min="1"
                                 step="1"
-                                class="mt-2 w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                class="mt-2 w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
                                 placeholder="Или своя сумма"
                             />
                             <p v-if="form.errors.amount" class="mt-1 text-sm text-red-600">{{ form.errors.amount }}</p>
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Телефон</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Телефон</label>
                             <input
                                 v-model="form.phone"
                                 type="tel"
                                 placeholder="+996 700 000 000"
-                                class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                class="w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
                             />
                             <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
                         </div>
 
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-stone-700">Имя (необязательно)</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Имя (необязательно)</label>
                             <input
                                 v-model="form.name"
                                 type="text"
                                 placeholder="Как к вам обращаться"
-                                class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                class="w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
                             />
                             <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
-                            <label class="mt-2 flex items-center gap-2 text-sm text-stone-600">
-                                <input v-model="form.show_name_publicly" type="checkbox" class="rounded border-stone-300 text-amber-500 focus:ring-amber-500" />
+                            <label class="mt-2 flex items-center gap-2 text-sm text-[#5B6472]">
+                                <input v-model="form.show_name_publicly" type="checkbox" class="rounded border-[#DCE6F0] text-brand-navy focus:ring-brand-cyan" />
                                 Показывать моё имя в списке донатов вместо номера телефона
                             </label>
                         </div>
@@ -496,29 +503,29 @@ function submit() {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="w-full rounded-lg bg-amber-500 px-4 py-3 font-medium text-white transition hover:bg-amber-600 disabled:opacity-60"
+                            class="font-heading w-full rounded-lg bg-brand-navy px-4 py-3 font-bold text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
                         >
                             {{ form.processing ? 'Отправляем…' : `Поддержать — ${form.amount || 0} сом` }}
                         </button>
-                        <p class="text-center text-xs text-stone-400">
+                        <p class="text-center text-xs text-[#8B94A3]">
                             Демо-режим: реальный платёжный провайдер ещё не подключён, деньги не списываются.
                         </p>
                     </form>
                 </div>
 
-                <div v-if="recentDonations.length > 0" class="mt-4 rounded-xl border border-stone-200 bg-white p-4 sm:p-5">
-                    <h2 class="text-sm font-medium text-stone-700">Последние донаты</h2>
+                <div v-if="recentDonations.length > 0" class="mt-4 rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
+                    <h2 class="font-heading text-sm font-bold text-[#101318]">Последние донаты</h2>
                     <ul class="mt-3 space-y-2">
                         <li
                             v-for="(donation, index) in recentDonations"
                             :key="index"
-                            class="flex items-center justify-between text-sm text-stone-600"
+                            class="flex items-center justify-between text-sm text-[#5B6472]"
                         >
                             <span class="flex flex-col">
-                                <span class="text-stone-400">{{ formatDate(donation.created_at) }}</span>
-                                <span v-if="donation.donorDisplay" class="text-xs text-stone-400">{{ donation.donorDisplay }}</span>
+                                <span class="text-[#8B94A3]">{{ formatDate(donation.created_at) }}</span>
+                                <span v-if="donation.donorDisplay" class="text-xs text-[#8B94A3]">{{ donation.donorDisplay }}</span>
                             </span>
-                            <span class="font-medium">{{ formatSom(donation.amount_minor) }}</span>
+                            <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor) }}</span>
                         </li>
                     </ul>
                 </div>
