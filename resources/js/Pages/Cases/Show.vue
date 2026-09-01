@@ -29,6 +29,18 @@ const progressPercent = () =>
         ? Math.min(100, Math.round((props.case.allocated_minor / props.case.budget_minor) * 100))
         : 0;
 
+// Кольцо прогресса (GoFundMe-паттерн) — окружность длиной 2πr, показываем
+// нужную долю через stroke-dasharray/offset, остальное решает CSS-transition.
+const RING_RADIUS = 42;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const ringOffset = () => RING_CIRCUMFERENCE * (1 - progressPercent() / 100);
+
+// Для донатов с именем — инициал (аватар-кружок); для замаскированного
+// телефона (начинается на "+" или "****") показываем общую иконку донора,
+// потому что маскированный номер — не то, что стоит выносить в аватар.
+const isMaskedPhone = (display) => !display || display.startsWith('+') || display.startsWith('*');
+const avatarInitial = (display) => (isMaskedPhone(display) ? null : display.trim().charAt(0).toUpperCase());
+
 // Инстаграм не даёт сайту напрямую опубликовать сторис через URL. Хуже того:
 // его расширение в системном меню "Поделиться" откликается в основном на
 // изображения/видео — обычный текст+ссылка часто вообще не показывает пункт
@@ -417,25 +429,36 @@ function submit() {
             class="mt-6 aspect-video w-full rounded-[10px] object-cover"
         />
 
-        <div class="mt-8 grid gap-6 sm:grid-cols-3">
-            <div class="sm:col-span-2">
+        <div class="mt-8 grid gap-6 lg:grid-cols-3 lg:items-start">
+            <div class="lg:col-span-2">
                 <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
                     {{ pickLocale(props.case.story, locale()) }}
                 </p>
                 <p v-else class="text-[#8B94A3]">Подробностей пока нет.</p>
             </div>
 
-            <div class="sm:col-span-1">
+            <div class="lg:sticky lg:top-6 lg:col-span-1">
                 <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
-                    <div class="flex items-center gap-2.5">
-                        <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
-                            <div class="h-full bg-brand-navy" :style="{ width: progressPercent() + '%' }" />
+                    <div class="flex items-center gap-4">
+                        <div class="relative h-20 w-20 flex-shrink-0">
+                            <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
+                                <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
+                                <circle
+                                    cx="48" cy="48" r="42" fill="none" stroke="#0201a3" stroke-width="8"
+                                    stroke-linecap="round"
+                                    :stroke-dasharray="2 * Math.PI * 42"
+                                    :stroke-dashoffset="ringOffset()"
+                                    class="transition-[stroke-dashoffset] duration-500"
+                                />
+                            </svg>
+                            <span class="font-heading absolute inset-0 flex items-center justify-center text-base font-extrabold text-brand-navy">
+                                {{ progressPercent() }}%
+                            </span>
                         </div>
-                        <span class="font-heading text-sm font-bold text-brand-navy">{{ progressPercent() }}%</span>
-                    </div>
-                    <div class="mt-2 flex flex-col gap-1 text-sm text-[#5B6472] sm:flex-row sm:justify-between">
-                        <span>Собрано <b class="text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
-                        <span>Цель <b class="text-[#101318]">{{ formatSom(props.case.budget_minor) }}</b></span>
+                        <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
+                            <span>Собрано <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
+                            <span class="text-xs">Цель {{ formatSom(props.case.budget_minor) }}</span>
+                        </div>
                     </div>
 
                     <div class="mt-3 text-sm text-[#8B94A3]">
@@ -515,13 +538,24 @@ function submit() {
 
                 <div v-if="recentDonations.length > 0" class="mt-4 rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <h2 class="font-heading text-sm font-bold text-[#101318]">Последние донаты</h2>
-                    <ul class="mt-3 space-y-2">
+                    <ul class="mt-3 space-y-3">
                         <li
                             v-for="(donation, index) in recentDonations"
                             :key="index"
-                            class="flex items-center justify-between text-sm text-[#5B6472]"
+                            class="flex items-center gap-3 text-sm text-[#5B6472]"
                         >
-                            <span class="flex flex-col">
+                            <span
+                                v-if="avatarInitial(donation.donorDisplay)"
+                                class="font-heading flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-navy text-xs font-bold text-white"
+                            >
+                                {{ avatarInitial(donation.donorDisplay) }}
+                            </span>
+                            <span v-else class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#E4ECF5] text-[#8B94A3]">
+                                <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                    <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.2-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.8-3.6-5-8-5Z" />
+                                </svg>
+                            </span>
+                            <span class="flex flex-1 flex-col">
                                 <span class="text-[#8B94A3]">{{ formatDate(donation.created_at) }}</span>
                                 <span v-if="donation.donorDisplay" class="text-xs text-[#8B94A3]">{{ donation.donorDisplay }}</span>
                             </span>

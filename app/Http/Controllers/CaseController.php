@@ -26,15 +26,33 @@ class CaseController extends Controller
         $cases = PublicCase::query()
             ->where('status', 'active')
             ->orderByDesc('created_at')
-            ->get()
-            ->map($this->presentCase(...));
+            ->get();
+
+        // Число донатов на кейс — как в карточках GoFundMe ("X donations"),
+        // только настоящее: считаем аллокации, а не выдумываем. sum()/count()
+        // ниже на уже загруженной коллекции — вторая БД-поездка не нужна.
+        $donationsPerCase = Allocation::on('pgsql_public')
+            ->whereIn('case_id', $cases->pluck('id'))
+            ->selectRaw('case_id, count(*) as donations_count')
+            ->groupBy('case_id')
+            ->pluck('donations_count', 'case_id');
+
+        $presented = $cases->map(fn (PublicCase $case) => [
+            ...$this->presentCase($case),
+            'donationsCount' => (int) $donationsPerCase->get($case->id, 0),
+        ]);
 
         $this->shareMeta([
             'description' => 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.',
         ]);
 
         return Inertia::render('Cases/Index', [
-            'cases' => $cases,
+            'cases' => $presented,
+            'stats' => [
+                'activeCases' => $cases->count(),
+                'raisedMinor' => (int) $cases->sum('allocated_minor'),
+                'donationsCount' => (int) $donationsPerCase->sum(),
+            ],
         ]);
     }
 
