@@ -1,0 +1,28 @@
+name: Deploy (DigitalOcean)
+
+# Ручной триггер, как и Railway-деплой — раннер подключается по SSH к
+# Droplet и просто git pull + docker compose up --build: вся настоящая
+# работа (миграции, config:cache, сборка статики для Caddy) уже сделана
+# entrypoint'ами внутри docker-compose.yml, здесь только пересобрать
+# и пересоздать контейнеры на новом коде.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DO_SSH_HOST }}
+          username: ${{ secrets.DO_SSH_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/elimbar
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose up -d --build
+            echo "--- app container status ---"
+            docker compose ps app horizon scheduler caddy

@@ -8,19 +8,27 @@ x-app-env: &app-env
   env_file: [.env]
 
 services:
+  # Код, vendor/ и собранный public/build запечены в образ на этапе build
+  # (docker/php/Dockerfile) — никаких bind-mount volumes поверх контейнера:
+  # редеплой на VPS это git pull + docker compose up -d --build, не hot-reload.
   app:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
     <<: *app-env
+    entrypoint: /entrypoint.sh
     volumes:
-      - .:/var/www/html
+      # Только фактически изменяемые данные — загруженные фото кейсов
+      # (Storage::disk('public')). Всё остальное под public/ — статика,
+      # уже запечённая в образ, ей volume не нужен.
+      - case_photos:/var/www/html/storage/app/public
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
     networks: [elimbar]
+    restart: unless-stopped
 
   horizon:
     build:
@@ -28,8 +36,6 @@ services:
       dockerfile: docker/php/Dockerfile
     <<: *app-env
     command: php artisan horizon
-    volumes:
-      - .:/var/www/html
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,8 +51,6 @@ services:
     <<: *app-env
     # Драйвит лестницу ретраев рекуррента (1/3/7 дней) и ежедневную садаку.
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
-    volumes:
-      - .:/var/www/html
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,6 +98,40 @@ services:
     # Консоль MinIO (9001) не публикуется наружу — только через caddy/VPN
     # при необходимости.
 
+  # MinIO не создаёт бакет сам — без этого шага загрузка первого же proof
+  # упадёт с NoSuchBucket. Разовый контейнер, безопасно перезапускать
+  # (--ignore-existing).
+  minio-init:
+    image: minio/mc:latest
+    entrypoint: >
+      sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/$${AWS_BUCKET:-elimbar-proofs}
+      "
+    <<: *app-env
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks: [elimbar]
+    restart: "no"
+
+  # Caddy — отдельный контейнер (другая файловая система), поэтому не может
+  # раздать public/build, public/images и т.п. напрямую из образа app.
+  # Разовый контейнер копирует актуальную статику из свежесобранного
+  # образа app в volume, который caddy монтирует read-only — пересобирается
+  # и перезаписывается при каждом `docker compose up -d --build`, то есть
+  # на каждый деплой Caddy отдаёт то, что реально в этом билде app.
+  static-sync:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    entrypoint: []
+    command: sh -c "rm -rf /shared/* && cp -r /var/www/html/public/. /shared/"
+    volumes:
+      - public_static:/shared
+    networks: [elimbar]
+    restart: "no"
+
   caddy:
     image: caddy:2-alpine
     ports:
@@ -103,7 +141,17 @@ services:
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [app]
+      - public_static:/var/www/html/public:ro
+      # Смонтирован ПОВЕРХ public/storage внутри public_static — те же
+      # файлы, что app пишет в case_photos, видны здесь сразу, без задержки
+      # до следующего static-sync (в отличие от статики выше, фото должны
+      # быть доступны сразу после загрузки в Filament).
+      - case_photos:/var/www/html/public/storage:ro
+    depends_on:
+      app:
+        condition: service_started
+      static-sync:
+        condition: service_completed_successfully
     networks: [elimbar]
 
 networks:
@@ -115,3 +163,5 @@ volumes:
   minio_data:
   caddy_data:
   caddy_config:
+  case_photos:
+  public_static:
