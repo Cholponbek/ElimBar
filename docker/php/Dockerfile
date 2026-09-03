@@ -18,7 +18,7 @@ RUN apk add --no-cache \
         icu-dev \
         oniguruma-dev \
         $PHPIZE_DEPS \
-    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache \
+    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache pcntl \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apk del $PHPIZE_DEPS
