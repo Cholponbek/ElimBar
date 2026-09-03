@@ -12,6 +12,7 @@ services:
   # (docker/php/Dockerfile) — никаких bind-mount volumes поверх контейнера:
   # редеплой на VPS это git pull + docker compose up -d --build, не hot-reload.
   app:
+    image: elimbar-app:latest
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -31,6 +32,7 @@ services:
     restart: unless-stopped
 
   horizon:
+    image: elimbar-app:latest
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -45,6 +47,7 @@ services:
     restart: unless-stopped
 
   scheduler:
+    image: elimbar-app:latest
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -122,6 +125,7 @@ services:
   # и перезаписывается при каждом `docker compose up -d --build`, то есть
   # на каждый деплой Caddy отдаёт то, что реально в этом билде app.
   static-sync:
+    image: elimbar-app:latest
     build:
       context: .
       dockerfile: docker/php/Dockerfile
