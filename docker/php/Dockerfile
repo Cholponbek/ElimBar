@@ -32,7 +32,13 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY . .
 COPY --from=frontend /app/public/build ./public/build
-RUN composer dump-autoload --optimize
+# --no-scripts: composer.json's post-autoload-dump hook runs `artisan
+# package:discover`, which boots the app far enough to need storage/
+# framework/views (doesn't exist yet — created below) and a real DB
+# connection (doesn't exist at build time at all). entrypoint.sh runs
+# package:discover for real once the container actually starts, same
+# fix docker/railway/Dockerfile already had for the demo image.
+RUN composer dump-autoload --optimize --no-scripts
 
 # .dockerignore исключает эти каталоги из контекста сборки (чтобы не
 # запекать протухшие локальные логи/кэш), а значит их нет в образе даже
