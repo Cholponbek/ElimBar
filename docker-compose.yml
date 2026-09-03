@@ -145,6 +145,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    # Caddyfile читает {$APP_DOMAIN:localhost} как переменную окружения
+    # ПРОЦЕССА caddy — не через compose-интерполяцию (это две разные вещи).
+    # Без явной передачи caddy её просто не видит и всегда падает на
+    # дефолт "localhost", выпуская внутренний самоподписанный сертификат
+    # вместо настоящего Let's Encrypt на реальный домен.
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
     volumes:
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
