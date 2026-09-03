@@ -130,7 +130,11 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     entrypoint: []
-    command: sh -c "rm -rf /shared/* && cp -r /var/www/html/public/. /shared/"
+    # mkdir storage — caddy монтирует case_photos ПОВЕРХ этого пути (см.
+    # ниже), а public_static у caddy смонтирован read-only: Docker не
+    # может сам создать точку монтирования на read-only ФС, если её там
+    # ещё нет. Пустая директория здесь — то, во что случится тот mount.
+    command: sh -c "rm -rf /shared/* && cp -r /var/www/html/public/. /shared/ && mkdir -p /shared/storage"
     volumes:
       - public_static:/shared
     networks: [elimbar]
