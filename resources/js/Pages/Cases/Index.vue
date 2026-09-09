@@ -31,8 +31,15 @@ const donationsLabel = (n) => {
 <template>
     <PublicLayout>
         <template #hero>
-            <section class="border-b border-brand-cyan/30 bg-brand-navy">
-                <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+            <section class="relative overflow-hidden border-b border-brand-cyan/30 bg-brand-navy">
+                <img
+                    src="/images/pexels-huysuzkadraj-19142792.jpg"
+                    alt=""
+                    class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-navy/75 via-brand-navy/55 to-brand-navy/20" />
+
+                <div class="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
                     <span class="font-heading inline-block rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-cyan">
                         Общественный благотворительный фонд
                     </span>

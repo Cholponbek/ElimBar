@@ -7,7 +7,7 @@ import { Link } from '@inertiajs/vue3';
         <header class="border-b-[3px] border-brand-cyan bg-brand-navy">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
                 <Link href="/">
-                    <img src="/images/elimbar-logo-white.png" alt="Элим, барсыңбы?!" class="h-7 w-auto" />
+                    <img src="/images/elimbar-logo-white.png" alt="Элим, барсыңбы?!" class="h-9 w-auto" />
                 </Link>
                 <div class="flex items-center gap-4">
                     <Link href="/help" class="text-sm font-medium text-white hover:text-brand-cyan">
