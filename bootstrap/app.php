@@ -28,6 +28,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             SetTenantContext::class,
         ]);
+
+        // Finik — сервер-к-серверу, без браузерной сессии/CSRF-токена;
+        // подлинность подтверждает RSA-подпись (FinikPaymentGateway::
+        // verifyWebhookSignature), проверяемая внутри самого контроллера.
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/finik',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

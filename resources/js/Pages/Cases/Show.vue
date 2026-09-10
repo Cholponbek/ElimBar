@@ -12,6 +12,7 @@ const props = defineProps({
 const page = usePage();
 const locale = () => page.props.locale;
 const flashSuccess = () => page.props.flash?.success;
+const flashError = () => page.props.flash?.error;
 
 // Ссылка на конкретный кейс — то, чем реально делятся.
 const shareUrl = computed(() => (typeof window !== 'undefined' ? window.location.href : ''));
@@ -467,6 +468,9 @@ function submit() {
 
                     <div v-if="flashSuccess()" class="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                         {{ flashSuccess() }}
+                    </div>
+                    <div v-if="flashError()" class="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                        {{ flashError() }}
                     </div>
 
                     <form class="mt-6 space-y-4" @submit.prevent="submit">

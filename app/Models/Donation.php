@@ -20,6 +20,12 @@ class Donation extends Model
 {
     use BelongsToTenant, HasFactory, IsAppendOnly;
 
+    /** Зеркалит forbid_donation_money_update() — см. IsAppendOnly. */
+    protected static function appendOnlyFields(): array
+    {
+        return ['amount_minor', 'currency', 'fund_type', 'reversal_of_id'];
+    }
+
     protected $fillable = [
         'donor_id', 'campaign_id', 'case_id', 'subscription_id',
         'amount_minor', 'currency', 'provider_fee_minor', 'fund_type',
