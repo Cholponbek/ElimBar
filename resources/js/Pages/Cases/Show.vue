@@ -534,9 +534,6 @@ function submit() {
                         >
                             {{ form.processing ? 'Отправляем…' : `Поддержать — ${form.amount || 0} сом` }}
                         </button>
-                        <p class="text-center text-xs text-[#8B94A3]">
-                            Демо-режим: реальный платёжный провайдер ещё не подключён, деньги не списываются.
-                        </p>
                     </form>
                 </div>
 
