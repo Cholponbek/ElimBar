@@ -8,6 +8,7 @@ use App\Domain\Payments\DTO\ChargeResult;
 use App\Domain\Payments\DTO\PaymentIntent;
 use App\Domain\Payments\Services\FinikSigner;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -103,11 +104,15 @@ class FinikPaymentGateway implements PaymentGateway
     public function verifyWebhookSignature(string $rawBody, array $headers): bool
     {
         if ($this->webhookPublicKey === null) {
+            Log::warning('finik.webhook.no_public_key_configured');
+
             return false;
         }
 
         $signature = $this->headerValue($headers, 'signature');
         if ($signature === null) {
+            Log::warning('finik.webhook.missing_signature_header', ['headers' => array_keys($headers)]);
+
             return false;
         }
 
@@ -132,7 +137,24 @@ class FinikPaymentGateway implements PaymentGateway
 
         $data = $this->signer->canonicalString('POST', $webhookPath, $webhookHost, $apiHeaders, $body);
 
-        return $this->signer->verify($data, $signature, $this->webhookPublicKey);
+        $isValid = $this->signer->verify($data, $signature, $this->webhookPublicKey);
+
+        // Временно подробный лог, пока разбираемся, почему Finik отклоняет
+        // проверку — удалить, как только вебхук начнёт проходить. Ничего
+        // секретного здесь нет: тело вебхука не содержит приватных данных,
+        // signature — это подпись, не ключ.
+        Log::warning('finik.webhook.signature_check', [
+            'valid' => $isValid,
+            'canonical_string' => $data,
+            'signature_received' => $signature,
+            'api_headers_used' => $apiHeaders,
+            'webhook_host_used' => $webhookHost,
+            'webhook_path_used' => $webhookPath,
+            'raw_body' => $rawBody,
+            'all_incoming_headers' => $headers,
+        ]);
+
+        return $isValid;
     }
 
     public function externalEventId(array $payload): string
