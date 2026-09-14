@@ -139,20 +139,12 @@ class FinikPaymentGateway implements PaymentGateway
 
         $isValid = $this->signer->verify($data, $signature, $this->webhookPublicKey);
 
-        // Временно подробный лог, пока разбираемся, почему Finik отклоняет
-        // проверку — удалить, как только вебхук начнёт проходить. Ничего
-        // секретного здесь нет: тело вебхука не содержит приватных данных,
-        // signature — это подпись, не ключ.
-        Log::warning('finik.webhook.signature_check', [
-            'valid' => $isValid,
-            'canonical_string' => $data,
-            'signature_received' => $signature,
-            'api_headers_used' => $apiHeaders,
-            'webhook_host_used' => $webhookHost,
-            'webhook_path_used' => $webhookPath,
-            'raw_body' => $rawBody,
-            'all_incoming_headers' => $headers,
-        ]);
+        if (! $isValid) {
+            Log::warning('finik.webhook.crypto_mismatch', [
+                'canonical_string' => $data,
+                'signature_received' => $signature,
+            ]);
+        }
 
         return $isValid;
     }
