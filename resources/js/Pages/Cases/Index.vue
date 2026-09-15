@@ -2,30 +2,21 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import { formatSom, pickLocale } from '../../money.js';
+import { categoryLabel as categoryLabelFor, donationsWord, t } from '../../i18n.js';
 
 const props = defineProps({
     cases: { type: Array, required: true },
     stats: { type: Object, required: true },
+    siteSettings: { type: Object, default: null },
 });
 
 const page = usePage();
 const locale = () => page.props.locale;
 
-const categoryLabel = (category) => ({
-    medical: 'Лечение',
-    winter_food: 'Зимняя продуктовая помощь',
-    fund_project: 'Проект фонда',
-}[category] ?? category);
+const categoryLabel = (category) => categoryLabelFor(category, locale());
+const donationsLabel = (n) => donationsWord(n, locale());
 
 const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.allocated_minor / c.budget_minor) * 100)) : 0);
-
-const donationsLabel = (n) => {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod10 === 1 && mod100 !== 11) return 'донат';
-    if ([2, 3, 4].includes(mod10) && ![12, 13, 14].includes(mod100)) return 'доната';
-    return 'донатов';
-};
 </script>
 
 <template>
@@ -41,40 +32,40 @@ const donationsLabel = (n) => {
 
                 <div class="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
                     <span class="font-heading inline-block rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-cyan">
-                        Общественный благотворительный фонд
+                        {{ t('hero_badge', locale()) }}
                     </span>
                     <h1 class="font-heading mt-5 max-w-2xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
                         Элим, барсыңбы?!
                     </h1>
                     <p class="mt-4 max-w-xl text-base text-white/75 sm:text-lg">
-                        Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.
+                        {{ t('hero_subtitle', locale()) }}
                     </p>
                     <div class="mt-7 flex flex-wrap items-center gap-3">
                         <a
                             href="#cases"
                             class="font-heading rounded-lg bg-brand-cyan px-5 py-3 text-sm font-bold text-brand-navy transition hover:bg-white"
                         >
-                            Смотреть кейсы
+                            {{ t('hero_cta_view_cases', locale()) }}
                         </a>
                         <Link
                             href="/help"
                             class="font-heading rounded-lg border border-white/25 px-5 py-3 text-sm font-bold text-white transition hover:border-brand-cyan hover:text-brand-cyan"
                         >
-                            Нужна помощь?
+                            {{ t('nav_help', locale()) }}
                         </Link>
                     </div>
 
                     <dl class="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/15 pt-6 sm:mt-12 sm:pt-7">
                         <div>
-                            <dt class="text-xs text-white/60">Активных кейсов</dt>
+                            <dt class="text-xs text-white/60">{{ t('stat_active_cases', locale()) }}</dt>
                             <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ stats.activeCases }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs text-white/60">Собрано публично</dt>
+                            <dt class="text-xs text-white/60">{{ t('stat_raised', locale()) }}</dt>
                             <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ formatSom(stats.raisedMinor) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs text-white/60">Донатов</dt>
+                            <dt class="text-xs text-white/60">{{ t('stat_donations', locale()) }}</dt>
                             <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ stats.donationsCount }}</dd>
                         </div>
                     </dl>
@@ -82,10 +73,10 @@ const donationsLabel = (n) => {
             </section>
         </template>
 
-        <h2 id="cases" class="font-heading scroll-mt-6 text-xl font-bold text-brand-navy sm:text-2xl">Кейсы, которым нужна помощь</h2>
+        <h2 id="cases" class="font-heading scroll-mt-6 text-xl font-bold text-brand-navy sm:text-2xl">{{ t('cases_heading', locale()) }}</h2>
 
         <div v-if="cases.length === 0" class="mt-6 rounded-lg border border-dashed border-[#DCE6F0] p-10 text-center text-[#8B94A3]">
-            Пока нет активных кейсов.
+            {{ t('no_active_cases', locale()) }}
         </div>
 
         <div v-else class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -126,11 +117,52 @@ const donationsLabel = (n) => {
                         <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                     </div>
                     <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
-                        <span>Собрано <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
-                        <span>Цель <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
+                        <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
+                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
                     </div>
                 </div>
             </Link>
         </div>
+
+        <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 sm:grid-cols-2">
+            <div v-if="pickLocale(siteSettings.aboutBody, locale())">
+                <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">
+                    {{ pickLocale(siteSettings.aboutTitle, locale()) || t('about_heading', locale()) }}
+                </h2>
+                <p class="mt-4 whitespace-pre-line leading-relaxed text-[#3D4655]">
+                    {{ pickLocale(siteSettings.aboutBody, locale()) }}
+                </p>
+            </div>
+
+            <div>
+                <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('contacts_heading', locale()) }}</h2>
+                <dl class="mt-4 space-y-3 text-sm text-[#3D4655]">
+                    <div v-if="pickLocale(siteSettings.contactAddress, locale())">
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('address', locale()) }}</dt>
+                        <dd class="mt-0.5">{{ pickLocale(siteSettings.contactAddress, locale()) }}</dd>
+                    </div>
+                    <div v-if="siteSettings.contactPhone">
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('phone', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="`tel:${siteSettings.contactPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactPhone }}</a>
+                        </dd>
+                    </div>
+                    <div v-if="siteSettings.contactEmail">
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
+                        </dd>
+                    </div>
+                    <div v-if="siteSettings.contactInstagram || siteSettings.contactFacebook || siteSettings.contactWhatsapp">
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('social_networks', locale()) }}</dt>
+                        <dd class="mt-1 flex flex-wrap gap-3">
+                            <a v-if="siteSettings.contactInstagram" :href="siteSettings.contactInstagram" target="_blank" rel="noopener" class="hover:text-brand-cyan">Instagram</a>
+                            <a v-if="siteSettings.contactFacebook" :href="siteSettings.contactFacebook" target="_blank" rel="noopener" class="hover:text-brand-cyan">Facebook</a>
+                            <a v-if="siteSettings.contactWhatsapp" :href="siteSettings.contactWhatsapp" target="_blank" rel="noopener" class="hover:text-brand-cyan">WhatsApp</a>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
     </PublicLayout>
 </template>

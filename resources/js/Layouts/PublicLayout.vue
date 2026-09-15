@@ -1,5 +1,16 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { t } from '../i18n.js';
+
+const page = usePage();
+const locale = () => page.props.locale;
+
+// preserveScroll/preserveState — переключение языка не должно прыгать
+// наверх страницы или сбрасывать введённые в форму доната данные.
+function switchLocale(newLocale) {
+    if (newLocale === locale()) return;
+    router.post('/locale', { locale: newLocale }, { preserveScroll: true, preserveState: true });
+}
 </script>
 
 <template>
@@ -11,9 +22,27 @@ import { Link } from '@inertiajs/vue3';
                 </Link>
                 <div class="flex items-center gap-4">
                     <Link href="/help" class="text-sm font-medium text-white hover:text-brand-cyan">
-                        Нужна помощь?
+                        {{ t('nav_help', locale()) }}
                     </Link>
-                    <span class="hidden text-sm text-white/70 sm:inline">ОБФ · Бишкек, КР</span>
+                    <span class="hidden text-sm text-white/70 sm:inline">{{ t('org_line', locale()) }}</span>
+                    <div class="flex items-center gap-1 rounded-full bg-white/10 p-0.5 text-xs font-bold">
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'ky' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
+                            @click="switchLocale('ky')"
+                        >
+                            KY
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'ru' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
+                            @click="switchLocale('ru')"
+                        >
+                            RU
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -25,7 +54,7 @@ import { Link } from '@inertiajs/vue3';
         </main>
 
         <footer class="mt-16 border-t border-[#DCE6F0] py-8 text-center text-sm text-[#8B94A3]">
-            Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.
+            {{ t('footer_tagline', locale()) }}
         </footer>
     </div>
 </template>
