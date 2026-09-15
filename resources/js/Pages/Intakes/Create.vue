@@ -1,8 +1,10 @@
 <script setup>
 import { useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
+import { categoryLabel, t } from '../../i18n.js';
 
 const page = usePage();
+const locale = () => page.props.locale;
 const flashSuccess = () => page.props.flash?.success;
 
 const form = useForm({
@@ -23,10 +25,9 @@ function submit() {
 
 <template>
     <PublicLayout>
-        <h1 class="text-2xl font-semibold">Нужна помощь?</h1>
+        <h1 class="text-2xl font-semibold">{{ t('help_title', locale()) }}</h1>
         <p class="mt-1 text-stone-500">
-            Расскажите о ситуации — сотрудник фонда свяжется с вами и, если всё
-            подтвердится, кейс появится на сайте.
+            {{ t('help_subtitle', locale()) }}
         </p>
 
         <div v-if="flashSuccess()" class="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -35,7 +36,7 @@ function submit() {
 
         <form class="mt-8 max-w-lg space-y-4" @submit.prevent="submit">
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Ваше ФИО</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">{{ t('full_name', locale()) }}</label>
                 <input
                     v-model="form.full_name"
                     type="text"
@@ -45,30 +46,30 @@ function submit() {
             </div>
 
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Телефон</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">{{ t('phone', locale()) }}</label>
                 <input
                     v-model="form.phone"
                     type="tel"
-                    placeholder="+996 700 000 000"
+                    :placeholder="t('phone_placeholder', locale())"
                     class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
             </div>
 
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Категория</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">{{ t('category', locale()) }}</label>
                 <select
                     v-model="form.category"
                     class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-base focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 >
-                    <option value="medical">Лечение</option>
-                    <option value="winter_food">Зимняя продуктовая помощь</option>
+                    <option value="medical">{{ categoryLabel('medical', locale()) }}</option>
+                    <option value="winter_food">{{ categoryLabel('winter_food', locale()) }}</option>
                 </select>
                 <p v-if="form.errors.category" class="mt-1 text-sm text-red-600">{{ form.errors.category }}</p>
             </div>
 
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Опишите ситуацию</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">{{ t('describe_situation', locale()) }}</label>
                 <textarea
                     v-model="form.description"
                     rows="5"
@@ -78,7 +79,7 @@ function submit() {
             </div>
 
             <div>
-                <label class="mb-1.5 block text-sm font-medium text-stone-700">Нужная сумма, сом (если известна)</label>
+                <label class="mb-1.5 block text-sm font-medium text-stone-700">{{ t('requested_amount', locale()) }}</label>
                 <input
                     v-model.number="form.requested_amount"
                     type="number"
@@ -94,7 +95,7 @@ function submit() {
                 :disabled="form.processing"
                 class="w-full rounded-lg bg-amber-500 px-4 py-3 font-medium text-white transition hover:bg-amber-600 disabled:opacity-60"
             >
-                {{ form.processing ? 'Отправляем…' : 'Отправить заявку' }}
+                {{ form.processing ? t('sending', locale()) : t('submit_request', locale()) }}
             </button>
         </form>
     </PublicLayout>

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import { formatSom, pickLocale } from '../../money.js';
+import { categoryLabel as categoryLabelFor, t } from '../../i18n.js';
 
 const props = defineProps({
     case: { type: Object, required: true },
@@ -19,11 +20,7 @@ const shareUrl = computed(() => (typeof window !== 'undefined' ? window.location
 const shareTitle = computed(() => pickLocale(props.case.title, locale()));
 const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
-const categoryLabel = (category) => ({
-    medical: 'Лечение',
-    winter_food: 'Зимняя продуктовая помощь',
-    fund_project: 'Проект фонда',
-}[category] ?? category);
+const categoryLabel = (category) => categoryLabelFor(category, locale());
 
 const progressPercent = () =>
     props.case.budget_minor > 0
@@ -249,7 +246,7 @@ async function buildStoryImage() {
     });
     cursorY += STORY_TITLE.gapAfter;
 
-    const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor)} собрано`, pad, cursorY, {
+    const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor)} ${t('story_collected_suffix', locale())}`, pad, cursorY, {
         font: `800 ${STORY_STAT.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
         bgColor: STORY_ACCENT,
@@ -277,10 +274,10 @@ async function buildStoryImage() {
 
     ctx.font = `600 34px ${STORY_FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText(`Цель — ${formatSom(props.case.budget_minor)}`, pad, cursorY);
+    ctx.fillText(`${t('story_goal_prefix', locale())} ${formatSom(props.case.budget_minor)}`, pad, cursorY);
     cursorY += STORY_GOAL_BLOCK;
 
-    const ctaPill = drawPill(ctx, 'Поддержать →', pad, cursorY, {
+    const ctaPill = drawPill(ctx, `${t('support', locale())} →`, pad, cursorY, {
         font: `800 ${STORY_CTA.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
         bgColor: STORY_ACCENT,
@@ -371,7 +368,7 @@ function submit() {
 
 <template>
     <PublicLayout>
-        <Link href="/" class="text-sm text-[#5B6472] hover:text-brand-navy">&larr; Все кейсы</Link>
+        <Link href="/" class="text-sm text-[#5B6472] hover:text-brand-navy">&larr; {{ t('back_to_cases', locale()) }}</Link>
 
         <div class="font-heading mt-4 text-xs font-bold uppercase tracking-wider text-brand-cyan">
             {{ categoryLabel(props.case.category) }}
@@ -388,7 +385,7 @@ function submit() {
                 class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
                 @click="nativeShare"
             >
-                {{ sharingImage ? 'Готовим карточку…' : 'Поделиться' }}
+                {{ sharingImage ? t('preparing_card', locale()) : t('share', locale()) }}
             </button>
             <button
                 type="button"
@@ -396,7 +393,7 @@ function submit() {
                 class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
                 @click="downloadStoryCard"
             >
-                {{ downloadingImage ? 'Готовим…' : 'Скачать карточку для Stories' }}
+                {{ downloadingImage ? t('preparing', locale()) : t('download_story_card', locale()) }}
             </button>
             <a
                 :href="telegramShareUrl"
@@ -419,7 +416,7 @@ function submit() {
                 class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
                 @click="copyLink"
             >
-                {{ linkCopied ? 'Ссылка скопирована' : 'Скопировать ссылку' }}
+                {{ linkCopied ? t('link_copied', locale()) : t('copy_link', locale()) }}
             </button>
         </div>
 
@@ -435,7 +432,7 @@ function submit() {
                 <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
                     {{ pickLocale(props.case.story, locale()) }}
                 </p>
-                <p v-else class="text-[#8B94A3]">Подробностей пока нет.</p>
+                <p v-else class="text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
             </div>
 
             <div class="lg:sticky lg:top-6 lg:col-span-1">
@@ -457,13 +454,13 @@ function submit() {
                             </span>
                         </div>
                         <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
-                            <span>Собрано <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
-                            <span class="text-xs">Цель {{ formatSom(props.case.budget_minor) }}</span>
+                            <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
+                            <span class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor) }}</span>
                         </div>
                     </div>
 
                     <div class="mt-3 text-sm text-[#8B94A3]">
-                        Выплачено по кейсу: {{ formatSom(props.case.disbursed_minor) }}
+                        {{ t('disbursed_for_case', locale()) }} {{ formatSom(props.case.disbursed_minor) }}
                     </div>
 
                     <div v-if="flashSuccess()" class="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -475,7 +472,7 @@ function submit() {
 
                     <form class="mt-6 space-y-4" @submit.prevent="submit">
                         <div>
-                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Сумма, сом</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">{{ t('amount_som', locale()) }}</label>
                             <div class="flex flex-wrap gap-2">
                                 <button
                                     v-for="preset in presetAmounts"
@@ -496,34 +493,34 @@ function submit() {
                                 min="1"
                                 step="1"
                                 class="mt-2 w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
-                                placeholder="Или своя сумма"
+                                :placeholder="t('custom_amount_placeholder', locale())"
                             />
                             <p v-if="form.errors.amount" class="mt-1 text-sm text-red-600">{{ form.errors.amount }}</p>
                         </div>
 
                         <div>
-                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Телефон</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">{{ t('phone', locale()) }}</label>
                             <input
                                 v-model="form.phone"
                                 type="tel"
-                                placeholder="+996 700 000 000"
+                                :placeholder="t('phone_placeholder', locale())"
                                 class="w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
                             />
                             <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
                         </div>
 
                         <div>
-                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">Имя (необязательно)</label>
+                            <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">{{ t('name_optional', locale()) }}</label>
                             <input
                                 v-model="form.name"
                                 type="text"
-                                placeholder="Как к вам обращаться"
+                                :placeholder="t('name_placeholder', locale())"
                                 class="w-full rounded-lg border border-[#DCE6F0] px-3 py-2.5 text-base focus:border-brand-cyan focus:outline-none focus:ring-1 focus:ring-brand-cyan"
                             />
                             <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
                             <label class="mt-2 flex items-center gap-2 text-sm text-[#5B6472]">
                                 <input v-model="form.show_name_publicly" type="checkbox" class="rounded border-[#DCE6F0] text-brand-navy focus:ring-brand-cyan" />
-                                Показывать моё имя в списке донатов вместо номера телефона
+                                {{ t('show_name_publicly', locale()) }}
                             </label>
                         </div>
 
@@ -532,13 +529,13 @@ function submit() {
                             :disabled="form.processing"
                             class="font-heading w-full rounded-lg bg-brand-navy px-4 py-3 font-bold text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
                         >
-                            {{ form.processing ? 'Отправляем…' : `Поддержать — ${form.amount || 0} сом` }}
+                            {{ form.processing ? t('sending', locale()) : `${t('support', locale())} — ${form.amount || 0} сом` }}
                         </button>
                     </form>
                 </div>
 
                 <div v-if="recentDonations.length > 0" class="mt-4 rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
-                    <h2 class="font-heading text-sm font-bold text-[#101318]">Последние донаты</h2>
+                    <h2 class="font-heading text-sm font-bold text-[#101318]">{{ t('recent_donations', locale()) }}</h2>
                     <ul class="mt-3 space-y-3">
                         <li
                             v-for="(donation, index) in recentDonations"

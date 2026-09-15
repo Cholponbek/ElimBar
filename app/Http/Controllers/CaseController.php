@@ -6,7 +6,7 @@ use App\Models\Allocation;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\PublicCase;
-use Illuminate\Http\Request;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -46,6 +46,12 @@ class CaseController extends Controller
             'description' => 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.',
         ]);
 
+        // ->on('pgsql_public'), не SiteSetting::current(): та читает через
+        // подключение по умолчанию (роль-владелец), а этот контроллер —
+        // контур A донора, здесь принципиально не трогать ничего, кроме
+        // app_public (см. докблок класса).
+        $siteSettings = SiteSetting::on('pgsql_public')->first();
+
         return Inertia::render('Cases/Index', [
             'cases' => $presented,
             'stats' => [
@@ -53,6 +59,16 @@ class CaseController extends Controller
                 'raisedMinor' => (int) $cases->sum('allocated_minor'),
                 'donationsCount' => (int) $donationsPerCase->sum(),
             ],
+            'siteSettings' => $siteSettings ? [
+                'aboutTitle' => $siteSettings->about_title,
+                'aboutBody' => $siteSettings->about_body,
+                'contactAddress' => $siteSettings->contact_address,
+                'contactPhone' => $siteSettings->contact_phone,
+                'contactEmail' => $siteSettings->contact_email,
+                'contactInstagram' => $siteSettings->contact_instagram,
+                'contactFacebook' => $siteSettings->contact_facebook,
+                'contactWhatsapp' => $siteSettings->contact_whatsapp,
+            ] : null,
         ]);
     }
 
