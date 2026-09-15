@@ -420,20 +420,21 @@ function submit() {
             </button>
         </div>
 
-        <img
-            v-if="props.case.photoUrl"
-            :src="props.case.photoUrl"
-            :alt="pickLocale(props.case.title, locale())"
-            class="mt-6 aspect-video w-full rounded-[10px] object-cover"
-        />
+        <div class="mt-6">
+            <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
+                {{ pickLocale(props.case.story, locale()) }}
+            </p>
+            <p v-else class="text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
+        </div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-3 lg:items-start">
-            <div class="lg:col-span-2">
-                <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
-                    {{ pickLocale(props.case.story, locale()) }}
-                </p>
-                <p v-else class="text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
-            </div>
+            <img
+                v-if="props.case.photoUrl"
+                :src="props.case.photoUrl"
+                :alt="pickLocale(props.case.title, locale())"
+                class="aspect-video w-full rounded-[10px] object-cover lg:col-span-2"
+            />
+            <div v-else class="aspect-video w-full rounded-[10px] bg-gradient-to-br from-brand-blue to-brand-navy lg:col-span-2" />
 
             <div class="lg:sticky lg:top-6 lg:col-span-1">
                 <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
