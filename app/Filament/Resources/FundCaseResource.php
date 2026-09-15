@@ -92,6 +92,15 @@ class FundCaseResource extends Resource
                             ->directory('case-photos')
                             ->visibility('public')
                             ->image()
+                            // Ресайз в браузере перед загрузкой (Filament, через
+                            // filepond-plugin-image-resize) — карточки на сайте
+                            // никогда не показывают фото шире ~800px (aspect-video
+                            // в 2/3 колонки), а телефонные камеры отдают 3000–4000px.
+                            // upscale(false) — не увеличивает уже маленькие фото.
+                            ->imageResizeTargetWidth('1600')
+                            ->imageResizeTargetHeight('900')
+                            ->imageResizeMode('cover')
+                            ->imageResizeUpscale(false)
                             ->maxSize(5120)
                             ->columnSpanFull(),
                     ]),
