@@ -420,21 +420,29 @@ function submit() {
             </button>
         </div>
 
-        <div class="mt-6">
-            <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line leading-relaxed text-[#3D4655]">
-                {{ pickLocale(props.case.story, locale()) }}
-            </p>
-            <p v-else class="text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
-        </div>
+        <div class="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
+            <div class="relative min-h-[320px] w-full overflow-hidden rounded-[10px] sm:aspect-video sm:min-h-0 lg:col-span-2">
+                <img
+                    v-if="props.case.photoUrl"
+                    :src="props.case.photoUrl"
+                    :alt="pickLocale(props.case.title, locale())"
+                    class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div v-else class="absolute inset-0 bg-gradient-to-br from-brand-blue to-brand-navy" />
 
-        <div class="mt-8 grid gap-6 lg:grid-cols-3 lg:items-start">
-            <img
-                v-if="props.case.photoUrl"
-                :src="props.case.photoUrl"
-                :alt="pickLocale(props.case.title, locale())"
-                class="aspect-video w-full rounded-[10px] object-cover lg:col-span-2"
-            />
-            <div v-else class="aspect-video w-full rounded-[10px] bg-gradient-to-br from-brand-blue to-brand-navy lg:col-span-2" />
+                <!-- Левая половина картинки остаётся чистой, правая
+                     затемняется под читаемый текст — жёсткая граница на
+                     50%, а не плавный градиент с самого края, чтобы фото
+                     слева было видно без затемнения вообще. -->
+                <div class="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,transparent_50%,rgba(2,1,163,0.55)_58%,rgba(2,1,163,0.92)_100%)]" />
+
+                <div class="absolute inset-y-0 right-0 flex w-1/2 items-center p-4 sm:p-6 lg:p-8">
+                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-xs leading-relaxed text-white sm:text-sm lg:text-base">
+                        {{ pickLocale(props.case.story, locale()) }}
+                    </p>
+                    <p v-else class="text-xs text-white/70 sm:text-sm">{{ t('no_details_yet', locale()) }}</p>
+                </div>
+            </div>
 
             <div class="lg:sticky lg:top-6 lg:col-span-1">
                 <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
