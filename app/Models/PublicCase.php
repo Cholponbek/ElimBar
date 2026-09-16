@@ -33,6 +33,7 @@ class PublicCase extends Model
     protected $casts = [
         'public_title' => 'array',
         'public_story' => 'array',
+        'public_photo_paths' => 'array',
         'budget_minor' => 'integer',
         'allocated_minor' => 'integer',
         'disbursed_minor' => 'integer',

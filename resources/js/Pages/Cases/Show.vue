@@ -22,6 +22,19 @@ const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.shar
 
 const categoryLabel = (category) => categoryLabelFor(category, locale());
 
+// Карусель фото — case.photoUrls (новые кейсы, порядок как в админке) с
+// откатом на одиночный photoUrl для кейсов, заведённых до карусели.
+const photos = computed(() =>
+    props.case.photoUrls?.length ? props.case.photoUrls : (props.case.photoUrl ? [props.case.photoUrl] : []),
+);
+const activePhoto = ref(0);
+function prevPhoto() {
+    activePhoto.value = (activePhoto.value - 1 + photos.value.length) % photos.value.length;
+}
+function nextPhoto() {
+    activePhoto.value = (activePhoto.value + 1) % photos.value.length;
+}
+
 const progressPercent = () =>
     props.case.budget_minor > 0
         ? Math.min(100, Math.round((props.case.allocated_minor / props.case.budget_minor) * 100))
@@ -346,6 +359,19 @@ async function copyLink() {
     setTimeout(() => (linkCopied.value = false), 2000);
 }
 
+// Кнопка "Поделиться" в карточке доната — быстрый доступ к тому же
+// системному шерингу, что и кнопка над фото; на десктопе (нет
+// navigator.share) откатывается на копирование ссылки.
+async function quickShare() {
+    if (canNativeShare) {
+        await nativeShare();
+        return;
+    }
+    await copyLink();
+}
+
+const donateFormOpen = ref(false);
+
 const formatDate = (isoString) =>
     new Date(isoString).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
 
@@ -377,70 +403,101 @@ function submit() {
             {{ pickLocale(props.case.title, locale()) }}
         </h1>
 
-        <div class="mt-3 flex flex-wrap items-center gap-2">
-            <button
-                v-if="canNativeShare"
-                type="button"
-                :disabled="sharingImage"
-                class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
-                @click="nativeShare"
-            >
-                {{ sharingImage ? t('preparing_card', locale()) : t('share', locale()) }}
-            </button>
-            <button
-                type="button"
-                :disabled="downloadingImage"
-                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
-                @click="downloadStoryCard"
-            >
-                {{ downloadingImage ? t('preparing', locale()) : t('download_story_card', locale()) }}
-            </button>
-            <a
-                :href="telegramShareUrl"
-                target="_blank"
-                rel="noopener"
-                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-            >
-                Telegram
-            </a>
-            <a
-                :href="whatsappShareUrl"
-                target="_blank"
-                rel="noopener"
-                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-            >
-                WhatsApp
-            </a>
-            <button
-                type="button"
-                class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-                @click="copyLink"
-            >
-                {{ linkCopied ? t('link_copied', locale()) : t('copy_link', locale()) }}
-            </button>
-        </div>
-
         <div class="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
-            <div class="relative min-h-[320px] w-full overflow-hidden rounded-[10px] sm:aspect-video sm:min-h-0 lg:col-span-2">
-                <img
-                    v-if="props.case.photoUrl"
-                    :src="props.case.photoUrl"
-                    :alt="pickLocale(props.case.title, locale())"
-                    class="absolute inset-0 h-full w-full object-cover"
-                />
-                <div v-else class="absolute inset-0 bg-gradient-to-br from-brand-blue to-brand-navy" />
+            <div class="lg:col-span-2">
+                <!-- Карусель: одна фотография видна за раз, стрелки и точки
+                     только когда их реально из чего выбирать. -->
+                <div class="relative aspect-video w-full overflow-hidden rounded-[10px] bg-gradient-to-br from-brand-blue to-brand-navy">
+                    <img
+                        v-if="photos.length"
+                        :src="photos[activePhoto]"
+                        :alt="pickLocale(props.case.title, locale())"
+                        class="absolute inset-0 h-full w-full object-cover"
+                    />
 
-                <!-- Левая половина картинки остаётся чистой, правая
-                     затемняется под читаемый текст — жёсткая граница на
-                     50%, а не плавный градиент с самого края, чтобы фото
-                     слева было видно без затемнения вообще. -->
-                <div class="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,transparent_50%,rgba(2,1,163,0.55)_58%,rgba(2,1,163,0.92)_100%)]" />
+                    <template v-if="photos.length > 1">
+                        <button
+                            type="button"
+                            class="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand-navy shadow transition hover:bg-white"
+                            :aria-label="t('previous_photo', locale())"
+                            @click="prevPhoto"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-brand-navy shadow transition hover:bg-white"
+                            :aria-label="t('next_photo', locale())"
+                            @click="nextPhoto"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                            <button
+                                v-for="(photo, index) in photos"
+                                :key="index"
+                                type="button"
+                                class="h-1.5 rounded-full transition-all"
+                                :class="index === activePhoto ? 'w-5 bg-white' : 'w-1.5 bg-white/50'"
+                                :aria-label="`${t('photo', locale())} ${index + 1}`"
+                                @click="activePhoto = index"
+                            />
+                        </div>
+                    </template>
+                </div>
 
-                <div class="absolute inset-y-0 right-0 flex w-1/2 items-center p-4 sm:p-6 lg:p-8">
-                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-xs leading-relaxed text-white sm:text-sm lg:text-base">
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                        v-if="canNativeShare"
+                        type="button"
+                        :disabled="sharingImage"
+                        class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
+                        @click="nativeShare"
+                    >
+                        {{ sharingImage ? t('preparing_card', locale()) : t('share', locale()) }}
+                    </button>
+                    <button
+                        type="button"
+                        :disabled="downloadingImage"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
+                        @click="downloadStoryCard"
+                    >
+                        {{ downloadingImage ? t('preparing', locale()) : t('download_story_card', locale()) }}
+                    </button>
+                    <a
+                        :href="telegramShareUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                    >
+                        Telegram
+                    </a>
+                    <a
+                        :href="whatsappShareUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                    >
+                        WhatsApp
+                    </a>
+                    <button
+                        type="button"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                        @click="copyLink"
+                    >
+                        {{ linkCopied ? t('link_copied', locale()) : t('copy_link', locale()) }}
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
                         {{ pickLocale(props.case.story, locale()) }}
                     </p>
-                    <p v-else class="text-xs text-white/70 sm:text-sm">{{ t('no_details_yet', locale()) }}</p>
+                    <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
                 </div>
             </div>
 
@@ -479,7 +536,24 @@ function submit() {
                         {{ flashError() }}
                     </div>
 
-                    <form class="mt-6 space-y-4" @submit.prevent="submit">
+                    <div v-if="!donateFormOpen" class="mt-6 flex gap-2">
+                        <button
+                            type="button"
+                            class="font-heading flex-1 rounded-lg bg-brand-navy px-4 py-3 font-bold text-white transition hover:bg-brand-navy/90"
+                            @click="donateFormOpen = true"
+                        >
+                            {{ t('support', locale()) }}
+                        </button>
+                        <button
+                            type="button"
+                            class="font-heading flex-1 rounded-lg border border-[#DCE6F0] px-4 py-3 font-bold text-[#101318] transition hover:border-brand-cyan"
+                            @click="quickShare"
+                        >
+                            {{ t('share', locale()) }}
+                        </button>
+                    </div>
+
+                    <form v-else class="mt-6 space-y-4" @submit.prevent="submit">
                         <div>
                             <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">{{ t('amount_som', locale()) }}</label>
                             <div class="flex flex-wrap gap-2">

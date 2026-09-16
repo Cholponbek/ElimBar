@@ -28,12 +28,13 @@ class FundCase extends Model
     protected $fillable = [
         'request_id', 'campaign_id', 'beneficiary_id', 'category', 'status',
         'public_title', 'public_story', 'public_photo_id', 'public_photo_path',
-        'currency', 'budget_minor', 'allows_zakat', 'closed_at',
+        'public_photo_paths', 'currency', 'budget_minor', 'allows_zakat', 'closed_at',
     ];
 
     protected $casts = [
         'public_title' => 'array',
         'public_story' => 'array',
+        'public_photo_paths' => 'array',
         'budget_minor' => 'integer',
         'allocated_minor' => 'integer',
         'disbursed_minor' => 'integer',

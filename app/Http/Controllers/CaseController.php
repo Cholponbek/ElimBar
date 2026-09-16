@@ -177,14 +177,27 @@ class CaseController extends Controller
 
     private function presentCase(PublicCase $case): array
     {
+        // photoUrls — карусель (public_photo_paths, новые кейсы); у кейсов,
+        // заведённых до карусели, есть только одиночный public_photo_path —
+        // тогда показываем его как карусель из одной фотографии. photoUrl
+        // (первая фотография) остаётся отдельно — им пользуются карточка в
+        // списке кейсов и og:image, им незачем знать про карусель целиком.
+        $photoPaths = ! empty($case->public_photo_paths)
+            ? $case->public_photo_paths
+            : array_filter([$case->public_photo_path]);
+
+        $photoUrls = array_values(array_map(
+            fn (string $path) => Storage::disk('public')->url($path),
+            $photoPaths,
+        ));
+
         return [
             'id' => $case->id,
             'category' => $case->category,
             'title' => $case->public_title,
             'story' => $case->public_story,
-            'photoUrl' => $case->public_photo_path
-                ? Storage::disk('public')->url($case->public_photo_path)
-                : null,
+            'photoUrl' => $photoUrls[0] ?? null,
+            'photoUrls' => $photoUrls,
             'currency' => $case->currency,
             'budget_minor' => $case->budget_minor,
             'allocated_minor' => $case->allocated_minor,

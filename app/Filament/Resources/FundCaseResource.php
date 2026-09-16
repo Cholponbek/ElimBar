@@ -85,13 +85,16 @@ class FundCaseResource extends Resource
                         Forms\Components\Textarea::make('public_story.ru')
                             ->label('История (русский)')
                             ->rows(4),
-                        Forms\Components\FileUpload::make('public_photo_path')
-                            ->label('Фото')
-                            ->helperText('Обычная публичная картинка, без ограничений доступа — не документ о расходах.')
+                        Forms\Components\FileUpload::make('public_photo_paths')
+                            ->label('Фото (карусель)')
+                            ->helperText('Обычные публичные картинки, без ограничений доступа — не документы о расходах. Можно загрузить несколько, порядок — как на витрине.')
                             ->disk('public')
                             ->directory('case-photos')
                             ->visibility('public')
                             ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
                             // Ресайз в браузере перед загрузкой (Filament, через
                             // filepond-plugin-image-resize) — карточки на сайте
                             // никогда не показывают фото шире ~800px (aspect-video
