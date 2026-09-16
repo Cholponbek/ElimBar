@@ -501,7 +501,7 @@ function submit() {
                 </div>
             </div>
 
-            <div class="lg:sticky lg:top-6 lg:col-span-1">
+            <div class="lg:sticky lg:top-6 lg:col-span-1 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
                 <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
                         <div class="relative h-20 w-20 flex-shrink-0">
@@ -536,8 +536,9 @@ function submit() {
                         {{ flashError() }}
                     </div>
 
-                    <div v-if="!donateFormOpen" class="mt-6 flex gap-2">
+                    <div class="mt-6 flex gap-2">
                         <button
+                            v-if="!donateFormOpen"
                             type="button"
                             class="font-heading flex-1 rounded-lg bg-brand-navy px-4 py-3 font-bold text-white transition hover:bg-brand-navy/90"
                             @click="donateFormOpen = true"
@@ -553,7 +554,7 @@ function submit() {
                         </button>
                     </div>
 
-                    <form v-else class="mt-6 space-y-4" @submit.prevent="submit">
+                    <form v-if="donateFormOpen" class="mt-4 space-y-4" @submit.prevent="submit">
                         <div>
                             <label class="font-heading mb-1.5 block text-sm font-bold text-[#101318]">{{ t('amount_som', locale()) }}</label>
                             <div class="flex flex-wrap gap-2">
