@@ -3,12 +3,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import ShareModal from '../../Components/ShareModal.vue';
+import DonationsModal from '../../Components/DonationsModal.vue';
 import { formatSom, pickLocale } from '../../money.js';
 import { categoryLabel as categoryLabelFor, t } from '../../i18n.js';
 
 const props = defineProps({
     case: { type: Object, required: true },
     recentDonations: { type: Array, default: () => [] },
+    donationsCount: { type: Number, default: 0 },
 });
 
 const page = usePage();
@@ -17,6 +19,7 @@ const flashSuccess = () => page.props.flash?.success;
 const flashError = () => page.props.flash?.error;
 
 const shareModalRef = ref(null);
+const donationsModalRef = ref(null);
 
 const categoryLabel = (category) => categoryLabelFor(category, locale());
 
@@ -310,26 +313,34 @@ function submit() {
                             <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor) }}</span>
                         </li>
                     </ul>
+
+                    <div class="mt-4 flex gap-2">
+                        <button
+                            type="button"
+                            class="font-heading flex-1 rounded-full border border-[#DCE6F0] px-4 py-2 text-sm font-bold text-[#101318] transition hover:border-brand-cyan"
+                            @click="donationsModalRef.open('recent')"
+                        >
+                            {{ t('see_all_donations', locale()) }}
+                        </button>
+                        <button
+                            type="button"
+                            class="font-heading flex-1 rounded-full border border-[#DCE6F0] px-4 py-2 text-sm font-bold text-[#101318] transition hover:border-brand-cyan"
+                            @click="donationsModalRef.open('top')"
+                        >
+                            {{ t('see_top_donations', locale()) }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            <!-- "Поделиться" здесь не нужен отдельной кнопкой — она уже
+                 есть в карточке доната и в плавающей нижней панели,
+                 доступ к модалке шаринга и так под рукой везде. -->
             <div class="lg:col-start-1 lg:col-span-2 lg:row-start-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <button
-                        type="button"
-                        class="font-heading rounded-lg bg-brand-navy px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-navy/90"
-                        @click="shareModalRef.open()"
-                    >
-                        {{ t('share', locale()) }}
-                    </button>
-                </div>
-
-                <div class="mt-4">
-                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
-                        {{ pickLocale(props.case.story, locale()) }}
-                    </p>
-                    <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
-                </div>
+                <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
+                    {{ pickLocale(props.case.story, locale()) }}
+                </p>
+                <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
             </div>
         </div>
 
@@ -367,6 +378,7 @@ function submit() {
         </div>
 
         <ShareModal ref="shareModalRef" :case="props.case" />
+        <DonationsModal ref="donationsModalRef" :case-id="props.case.id" :donations-count="donationsCount" />
     </PublicLayout>
 </template>
 

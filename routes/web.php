@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 // отдельным panel-провайдером, не здесь).
 Route::get('/', [CaseController::class, 'index'])->name('cases.index');
 Route::get('/cases/{case}', [CaseController::class, 'show'])->name('cases.show');
+Route::get('/cases/{case}/donations', [CaseController::class, 'donations'])->name('cases.donations');
 Route::post('/cases/{case}/donate', [DonationController::class, 'store'])->name('donations.store');
 Route::get('/help', [PublicIntakeController::class, 'create'])->name('intakes.create');
 Route::post('/help', [PublicIntakeController::class, 'store'])->name('intakes.store');

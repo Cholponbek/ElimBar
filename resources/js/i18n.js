@@ -9,6 +9,8 @@ const translations = {
     ru: {
         nav_help: 'Нужна помощь?',
         org_line: 'ОБФ · Бишкек, КР',
+        support_menu_title: 'Выберите кейс, чтобы помочь',
+        view_all_cases: 'Смотреть все кейсы',
         footer_tagline: 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.',
 
         hero_badge: 'Общественный благотворительный фонд',
@@ -56,6 +58,13 @@ const translations = {
         support: 'Поддержать',
         sending: 'Отправляем…',
         recent_donations: 'Последние донаты',
+        see_all_donations: 'Смотреть все',
+        see_top_donations: 'Смотреть топ',
+        donations_modal_title: 'Донаты',
+        donations_tab_all: 'Все',
+        donations_tab_top: 'Топ',
+        loading: 'Загрузка…',
+        no_donations_yet: 'Пока нет донатов.',
 
         help_title: 'Нужна помощь?',
         help_subtitle: 'Расскажите о ситуации — сотрудник фонда свяжется с вами и, если всё подтвердится, кейс появится на сайте.',
@@ -77,6 +86,8 @@ const translations = {
     ky: {
         nav_help: 'Жардам керекпи?',
         org_line: 'ОБФ · Бишкек, КР',
+        support_menu_title: 'Жардам берүү үчүн кейс тандаңыз',
+        view_all_cases: 'Бардык кейстерди көрүү',
         footer_tagline: 'Ар бир сом конкреттүү кейске бекитилген — коомдук отчёт автоматтык түрдө түзүлөт.',
 
         hero_badge: 'Коомдук кайрымдуулук фонду',
@@ -124,6 +135,13 @@ const translations = {
         support: 'Колдоо көрсөтүү',
         sending: 'Жөнөтүлүүдө…',
         recent_donations: 'Акыркы донаттар',
+        see_all_donations: 'Баарын көрүү',
+        see_top_donations: 'Топту көрүү',
+        donations_modal_title: 'Донаттар',
+        donations_tab_all: 'Баары',
+        donations_tab_top: 'Топ',
+        loading: 'Жүктөлүүдө…',
+        no_donations_yet: 'Азырынча донат жок.',
 
         help_title: 'Жардам керекпи?',
         help_subtitle: 'Кырдаал жөнүндө айтып бериңиз — фонддун кызматкери сиз менен байланышат, эгер бардыгы ырасталса, кейс сайтта пайда болот.',

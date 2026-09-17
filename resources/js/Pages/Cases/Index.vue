@@ -30,17 +30,17 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                 />
                 <div class="absolute inset-0 bg-gradient-to-r from-brand-navy/75 via-brand-navy/55 to-brand-navy/20" />
 
-                <div class="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+                <div class="relative mx-auto max-w-6xl px-4 py-12 text-center sm:px-6 sm:py-16 sm:text-left lg:px-8 lg:py-20">
                     <span class="font-heading inline-block rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-cyan">
                         {{ t('hero_badge', locale()) }}
                     </span>
-                    <h1 class="font-heading mt-5 max-w-2xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
+                    <h1 class="font-heading mx-auto mt-5 max-w-2xl text-3xl font-extrabold leading-tight text-white sm:mx-0 sm:text-4xl lg:text-5xl">
                         Элим, барсыңбы?!
                     </h1>
-                    <p class="mt-4 max-w-xl text-base text-white/75 sm:text-lg">
+                    <p class="mx-auto mt-4 max-w-xl text-base text-white/75 sm:mx-0 sm:text-lg">
                         {{ t('hero_subtitle', locale()) }}
                     </p>
-                    <div class="mt-7 flex flex-wrap items-center gap-3">
+                    <div class="mt-7 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                         <a
                             href="#cases"
                             class="font-heading rounded-lg bg-brand-cyan px-5 py-3 text-sm font-bold text-brand-navy transition hover:bg-white"
@@ -55,7 +55,7 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         </Link>
                     </div>
 
-                    <dl class="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/15 pt-6 sm:mt-12 sm:pt-7">
+                    <dl class="mx-auto mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-white/15 pt-6 sm:mx-0 sm:mt-12 sm:pt-7">
                         <div>
                             <dt class="text-xs text-white/60">{{ t('stat_active_cases', locale()) }}</dt>
                             <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ stats.activeCases }}</dd>
@@ -73,7 +73,7 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
             </section>
         </template>
 
-        <h2 id="cases" class="font-heading scroll-mt-6 text-xl font-bold text-brand-navy sm:text-2xl">{{ t('cases_heading', locale()) }}</h2>
+        <h2 id="cases" class="font-heading scroll-mt-6 text-center text-xl font-bold text-brand-navy sm:text-left sm:text-2xl">{{ t('cases_heading', locale()) }}</h2>
 
         <div v-if="cases.length === 0" class="mt-6 rounded-lg border border-dashed border-[#DCE6F0] p-10 text-center text-[#8B94A3]">
             {{ t('no_active_cases', locale()) }}
@@ -124,12 +124,12 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
             </Link>
         </div>
 
-        <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 sm:grid-cols-2">
+        <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 text-center sm:grid-cols-2 sm:text-left">
             <div v-if="pickLocale(siteSettings.aboutBody, locale())">
                 <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">
                     {{ pickLocale(siteSettings.aboutTitle, locale()) || t('about_heading', locale()) }}
                 </h2>
-                <p class="mt-4 whitespace-pre-line leading-relaxed text-[#3D4655]">
+                <p class="mt-4 whitespace-pre-line text-left leading-relaxed text-[#3D4655]">
                     {{ pickLocale(siteSettings.aboutBody, locale()) }}
                 </p>
             </div>
@@ -155,7 +155,7 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                     </div>
                     <div v-if="siteSettings.contactInstagram || siteSettings.contactFacebook || siteSettings.contactWhatsapp">
                         <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('social_networks', locale()) }}</dt>
-                        <dd class="mt-1 flex flex-wrap gap-3">
+                        <dd class="mt-1 flex flex-wrap justify-center gap-3 sm:justify-start">
                             <a v-if="siteSettings.contactInstagram" :href="siteSettings.contactInstagram" target="_blank" rel="noopener" class="hover:text-brand-cyan">Instagram</a>
                             <a v-if="siteSettings.contactFacebook" :href="siteSettings.contactFacebook" target="_blank" rel="noopener" class="hover:text-brand-cyan">Facebook</a>
                             <a v-if="siteSettings.contactWhatsapp" :href="siteSettings.contactWhatsapp" target="_blank" rel="noopener" class="hover:text-brand-cyan">WhatsApp</a>
