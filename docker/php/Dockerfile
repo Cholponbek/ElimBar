@@ -17,8 +17,11 @@ RUN apk add --no-cache \
         libzip-dev \
         icu-dev \
         oniguruma-dev \
+        libpng-dev \
+        libjpeg-turbo-dev \
         $PHPIZE_DEPS \
-    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache pcntl \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip intl opcache pcntl gd exif \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apk del $PHPIZE_DEPS

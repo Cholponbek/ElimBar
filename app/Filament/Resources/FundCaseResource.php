@@ -4,11 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FundCaseResource\Pages;
 use App\Models\FundCase;
+use App\Support\CasePhotoProcessor;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Throwable;
 
 /**
  * Минимальная форма ведения кейса (тонкий срез, см. README/ARCHITECTURE.md).
@@ -105,6 +110,32 @@ class FundCaseResource extends Resource
                             ->imageResizeMode('cover')
                             ->imageResizeUpscale(false)
                             ->maxSize(5120)
+                            // Клиентский ресайз выше уменьшает разрешение, но не
+                            // формат/сжатие — телефон отдаёт тяжёлый JPEG, после
+                            // ресайза в браузере это всё ещё может быть
+                            // несколько сотен килобайт на фото. Здесь —
+                            // серверный проход через CasePhotoProcessor: то же
+                            // разрешение, но гарантированно пережатый JPEG,
+                            // независимо от того, что реально прислал браузер.
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): ?string {
+                                if (! $file->exists()) {
+                                    return null;
+                                }
+
+                                try {
+                                    $jpeg = CasePhotoProcessor::process($file->get());
+                                } catch (Throwable) {
+                                    // Не смогли обработать (неподдерживаемый
+                                    // формат и т.п.) — сохраняем как есть, это
+                                    // лучше, чем остаться совсем без фото.
+                                    return $file->store('case-photos', 'public');
+                                }
+
+                                $path = 'case-photos/'.Str::ulid().'.jpg';
+                                Storage::disk('public')->put($path, $jpeg);
+
+                                return $path;
+                            })
                             ->columnSpanFull(),
                     ]),
 
