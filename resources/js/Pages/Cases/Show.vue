@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import { formatSom, pickLocale } from '../../money.js';
@@ -372,6 +372,31 @@ async function quickShare() {
 
 const donateFormOpen = ref(false);
 
+// Плавающая нижняя панель на мобильном: показываем её только когда сама
+// карточка доната (donateCardEl) прокручена мимо экрана — иначе на
+// коротких экранах будет одновременно видно и карточку, и дублирующую
+// панель снизу.
+const donateCardEl = ref(null);
+const donateCardVisible = ref(true);
+let donateCardObserver = null;
+
+onMounted(() => {
+    if (typeof IntersectionObserver === 'undefined' || !donateCardEl.value) return;
+    donateCardObserver = new IntersectionObserver(([entry]) => {
+        donateCardVisible.value = entry.isIntersecting;
+    });
+    donateCardObserver.observe(donateCardEl.value);
+});
+
+onUnmounted(() => {
+    donateCardObserver?.disconnect();
+});
+
+function focusDonateCard() {
+    donateFormOpen.value = true;
+    donateCardEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 const formatDate = (isoString) =>
     new Date(isoString).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
 
@@ -403,8 +428,8 @@ function submit() {
             {{ pickLocale(props.case.title, locale()) }}
         </h1>
 
-        <div class="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
-            <div class="lg:col-span-2">
+        <div class="mt-6 grid gap-6 pb-20 lg:grid-cols-3 lg:items-start lg:pb-0">
+            <div class="lg:col-start-1 lg:col-span-2 lg:row-start-1">
                 <!-- Карусель: одна фотография видна за раз, стрелки и точки
                      только когда их реально из чего выбирать. -->
                 <div class="relative aspect-video w-full overflow-hidden rounded-[10px] bg-gradient-to-br from-brand-blue to-brand-navy">
@@ -449,59 +474,18 @@ function submit() {
                         </div>
                     </template>
                 </div>
-
-                <div class="mt-3 flex flex-wrap items-center gap-2">
-                    <button
-                        v-if="canNativeShare"
-                        type="button"
-                        :disabled="sharingImage"
-                        class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
-                        @click="nativeShare"
-                    >
-                        {{ sharingImage ? t('preparing_card', locale()) : t('share', locale()) }}
-                    </button>
-                    <button
-                        type="button"
-                        :disabled="downloadingImage"
-                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
-                        @click="downloadStoryCard"
-                    >
-                        {{ downloadingImage ? t('preparing', locale()) : t('download_story_card', locale()) }}
-                    </button>
-                    <a
-                        :href="telegramShareUrl"
-                        target="_blank"
-                        rel="noopener"
-                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-                    >
-                        Telegram
-                    </a>
-                    <a
-                        :href="whatsappShareUrl"
-                        target="_blank"
-                        rel="noopener"
-                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-                    >
-                        WhatsApp
-                    </a>
-                    <button
-                        type="button"
-                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
-                        @click="copyLink"
-                    >
-                        {{ linkCopied ? t('link_copied', locale()) : t('copy_link', locale()) }}
-                    </button>
-                </div>
-
-                <div class="mt-4">
-                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
-                        {{ pickLocale(props.case.story, locale()) }}
-                    </p>
-                    <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
-                </div>
             </div>
 
-            <div class="lg:sticky lg:top-6 lg:col-span-1 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+            <!-- Карточка доната: на мобильном идёт сразу под фото (до
+                 описания — не нужно листать вниз, чтобы её найти), на lg —
+                 отдельная колонка справа, растянутая на обе строки грида.
+                 donateCardEl — якорь для IntersectionObserver, который
+                 показывает плавающую нижнюю панель, когда эта карточка
+                 прокручена мимо экрана (см. скрипт). -->
+            <div
+                ref="donateCardEl"
+                class="lg:sticky lg:top-6 lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto"
+            >
                 <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
                         <div class="relative h-20 w-20 flex-shrink-0">
@@ -645,6 +629,84 @@ function submit() {
                         </li>
                     </ul>
                 </div>
+            </div>
+
+            <div class="lg:col-start-1 lg:col-span-2 lg:row-start-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button
+                        v-if="canNativeShare"
+                        type="button"
+                        :disabled="sharingImage"
+                        class="rounded-lg bg-brand-navy px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-navy/90 disabled:opacity-60"
+                        @click="nativeShare"
+                    >
+                        {{ sharingImage ? t('preparing_card', locale()) : t('share', locale()) }}
+                    </button>
+                    <button
+                        type="button"
+                        :disabled="downloadingImage"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan disabled:opacity-60"
+                        @click="downloadStoryCard"
+                    >
+                        {{ downloadingImage ? t('preparing', locale()) : t('download_story_card', locale()) }}
+                    </button>
+                    <a
+                        :href="telegramShareUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                    >
+                        Telegram
+                    </a>
+                    <a
+                        :href="whatsappShareUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                    >
+                        WhatsApp
+                    </a>
+                    <button
+                        type="button"
+                        class="rounded-lg border border-[#DCE6F0] px-3 py-1.5 text-sm text-[#5B6472] transition hover:border-brand-cyan"
+                        @click="copyLink"
+                    >
+                        {{ linkCopied ? t('link_copied', locale()) : t('copy_link', locale()) }}
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
+                        {{ pickLocale(props.case.story, locale()) }}
+                    </p>
+                    <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Плавающая нижняя панель — только на мобильном (на lg карточка
+             доната и так sticky-видна сбоку). Появляется, когда сама
+             карточка (donateCardEl) уходит за пределы экрана при
+             прокрутке описания, и остаётся на виду, пока пользователь не
+             вернётся к ней — не перекрывает текст описания, потому что
+             это просто тонкая полоса снизу, а не сама форма (снизу у
+             сетки есть pb-20 именно под неё). -->
+        <div
+            v-if="!donateCardVisible"
+            class="fixed inset-x-0 bottom-0 z-40 border-t border-[#DCE6F0] bg-white p-3 shadow-[0_-4px_16px_rgba(2,1,163,0.12)] lg:hidden"
+        >
+            <div class="flex items-center gap-3">
+                <div class="flex flex-1 flex-col text-sm text-[#5B6472]">
+                    <span class="font-heading font-bold text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</span>
+                    <span class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor) }}</span>
+                </div>
+                <button
+                    type="button"
+                    class="font-heading rounded-lg bg-brand-navy px-5 py-2.5 font-bold text-white transition hover:bg-brand-navy/90"
+                    @click="focusDonateCard"
+                >
+                    {{ t('support', locale()) }}
+                </button>
             </div>
         </div>
     </PublicLayout>
