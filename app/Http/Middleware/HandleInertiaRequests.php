@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\PublicCase;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +43,20 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            // Список кейсов для выпадающего меню "Поддержать" в хедере
+            // (PublicLayout.vue) — нужен на каждой странице (кейса, формы
+            // заявки и т.д.), не только на витрине, поэтому здесь, а не в
+            // отдельном контроллере. Только id+заголовок — меню показывает
+            // список для выбора, тащить фото/суммы каждого кейса незачем.
+            'navCases' => fn () => PublicCase::query()
+                ->where('status', 'active')
+                ->orderByDesc('created_at')
+                ->limit(20)
+                ->get(['id', 'public_title'])
+                ->map(fn (PublicCase $case) => [
+                    'id' => $case->id,
+                    'title' => $case->public_title,
+                ]),
         ];
     }
 }
