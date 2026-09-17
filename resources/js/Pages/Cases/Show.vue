@@ -433,12 +433,15 @@ function submit() {
                 <!-- Карусель: одна фотография видна за раз, стрелки и точки
                      только когда их реально из чего выбирать. -->
                 <div class="relative aspect-video w-full overflow-hidden rounded-[10px] bg-gradient-to-br from-brand-blue to-brand-navy">
-                    <img
-                        v-if="photos.length"
-                        :src="photos[activePhoto]"
-                        :alt="pickLocale(props.case.title, locale())"
-                        class="absolute inset-0 h-full w-full object-cover"
-                    />
+                    <Transition name="photo-fade">
+                        <img
+                            v-if="photos.length"
+                            :key="activePhoto"
+                            :src="photos[activePhoto]"
+                            :alt="pickLocale(props.case.title, locale())"
+                            class="absolute inset-0 h-full w-full object-cover"
+                        />
+                    </Transition>
 
                     <template v-if="photos.length > 1">
                         <button
@@ -717,3 +720,19 @@ function submit() {
         </div>
     </PublicLayout>
 </template>
+
+<style scoped>
+/* Кроссфейд между фото карусели: оба кадра — position:absolute inset-0
+   внутри одного relative-контейнера, так что пока новое проявляется,
+   старое ещё видно под ним на том же месте — плавный переход, а не
+   резкая смена. */
+.photo-fade-enter-active,
+.photo-fade-leave-active {
+    transition: opacity 0.35s ease;
+}
+
+.photo-fade-enter-from,
+.photo-fade-leave-to {
+    opacity: 0;
+}
+</style>

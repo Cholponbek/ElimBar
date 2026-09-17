@@ -12,6 +12,14 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
+	# Без этого браузер перекачивал одни и те же фото/JS/CSS заново при
+	# каждом визите — никакого Cache-Control не было вообще. Оба пути
+	# безопасно кэшировать намертво: /build/* — хэш в имени файла от Vite
+	# (новая сборка = новое имя), /storage/case-photos/* — ULID в имени
+	# (новое фото = новый файл, старое имя никогда не переиспользуется).
+	@immutableAssets path /build/* /storage/*
+	header @immutableAssets Cache-Control "public, max-age=31536000, immutable"
+
 	# TLS терминируется здесь, внутри периметра КР — никакого внешнего
 	# CDN/прокси перед Caddy (ARCHITECTURE.md §10, открытый вопрос #3 —
 	# трансграничная передача). Caddy сам оформляет сертификат через
