@@ -478,15 +478,14 @@ function submit() {
 
             <!-- Карточка доната: на мобильном идёт сразу под фото (до
                  описания — не нужно листать вниз, чтобы её найти), на lg —
-                 отдельная колонка справа, растянутая на обе строки грида.
-                 donateCardEl — якорь для IntersectionObserver, который
-                 показывает плавающую нижнюю панель, когда эта карточка
-                 прокручена мимо экрана (см. скрипт). -->
-            <div
-                ref="donateCardEl"
-                class="lg:sticky lg:top-6 lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto"
-            >
-                <div class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
+                 отдельная колонка справа, растянутая на обе строки грида. -->
+            <div class="lg:sticky lg:top-6 lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+                <!-- donateCardEl — якорь IntersectionObserver именно на
+                     этой карточке (кнопка/форма), НЕ на всей колонке —
+                     иначе, пока снизу ещё видна плашка "Последние донаты",
+                     плавающая панель не появляется, хотя сама кнопка
+                     "Поддержать" уже давно прокручена мимо экрана. -->
+                <div ref="donateCardEl" class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
                         <div class="relative h-20 w-20 flex-shrink-0">
                             <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
