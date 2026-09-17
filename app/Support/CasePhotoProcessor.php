@@ -21,7 +21,7 @@ class CasePhotoProcessor
 
     private const MAX_HEIGHT = 1600;
 
-    private const JPEG_QUALITY = 78;
+    private const JPEG_QUALITY = 72;
 
     /**
      * @return string Готовый JPEG (бинарные данные).
@@ -50,6 +50,13 @@ class CasePhotoProcessor
         $resized = imagecreatetruecolor($targetWidth, $targetHeight);
         imagecopyresampled($resized, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
         imagedestroy($source);
+
+        // Прогрессивный JPEG: браузер рисует размытое превью сразу по
+        // первым полученным байтам и дорисовывает по мере догрузки,
+        // вместо пустого места до самого последнего байта — на медленном
+        // /дальнем соединении (тестовый сервер в Сингапуре, донор в КР)
+        // ощущается быстрее при той же итоговой скорости передачи.
+        imageinterlace($resized, true);
 
         ob_start();
         imagejpeg($resized, null, self::JPEG_QUALITY);
