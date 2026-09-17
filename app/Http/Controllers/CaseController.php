@@ -7,6 +7,8 @@ use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\PublicCase;
 use App\Models\SiteSetting;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -76,6 +78,54 @@ class CaseController extends Controller
     {
         $case = PublicCase::query()->where('status', 'active')->findOrFail($case);
 
+        // Только 5 для инлайн-списка на странице — весь остальной список
+        // (и топ по сумме) живёт в модалке "Донаты", подгружается отдельным
+        // запросом (см. donations()) только когда её реально открывают.
+        $recentDonations = $this->loadDonations($case->id, 'recent', 5);
+
+        $donationsCount = Allocation::on('pgsql_public')
+            ->where('case_id', $case->id)
+            ->count();
+
+        $presented = $this->presentCase($case);
+
+        $this->shareMeta([
+            'type' => 'article',
+            'title' => $this->pickLocale($case->public_title, app()->getLocale()),
+            'description' => Str::limit($this->pickLocale($case->public_story, app()->getLocale()) ?: 'Помогите собрать на этот кейс — каждый сом виден в публичном отчёте.', 160),
+            'image' => $presented['photoUrl'],
+            'url' => url()->current(),
+        ]);
+
+        return Inertia::render('Cases/Show', [
+            'case' => $presented,
+            'recentDonations' => $recentDonations,
+            'donationsCount' => $donationsCount,
+        ]);
+    }
+
+    /**
+     * JSON, не Inertia — вызывается из модалки "Донаты" (DonationsModal.vue)
+     * через fetch(), без полной перезагрузки страницы. sort=top — по сумме
+     * аллокации по убыванию (кто задонатил больше всех на этот кейс), иначе
+     * по свежести, как в инлайн-списке на странице.
+     */
+    public function donations(Request $request, int $case): JsonResponse
+    {
+        PublicCase::query()->where('status', 'active')->findOrFail($case);
+
+        $sort = $request->string('sort')->value() === 'top' ? 'top' : 'recent';
+
+        return response()->json([
+            'data' => $this->loadDonations($case, $sort, 200),
+        ]);
+    }
+
+    /**
+     * @return array<int, array{amount_minor: int, created_at: string, donorDisplay: ?string}>
+     */
+    private function loadDonations(int $caseId, string $sort, int $limit): array
+    {
         // Телефон донора показываем замаскированным (только последние 3
         // цифры) — не полностью анонимно, но и не так, чтобы кто-то мог
         // прочитать чужой номер целиком с публичной страницы. Отдельные
@@ -83,9 +133,9 @@ class CaseController extends Controller
         // eager-load не даёт гарантии, каким connection пойдёт связанная
         // модель, а здесь это должно быть явно app_public, не app_staff.
         $allocations = Allocation::on('pgsql_public')
-            ->where('case_id', $case->id)
-            ->orderByDesc('created_at')
-            ->limit(10)
+            ->where('case_id', $caseId)
+            ->when($sort === 'top', fn ($query) => $query->orderByDesc('amount_minor'), fn ($query) => $query->orderByDesc('created_at'))
+            ->limit($limit)
             ->get(['donation_id', 'amount_minor', 'created_at']);
 
         $donations = Donation::on('pgsql_public')
@@ -101,7 +151,7 @@ class CaseController extends Controller
                 ? $donor->name
                 : $this->maskPhone($donor->phone));
 
-        $recentDonations = $allocations->map(function (Allocation $allocation) use ($donations, $donors) {
+        return $allocations->map(function (Allocation $allocation) use ($donations, $donors) {
             $donorId = $donations->get($allocation->donation_id)?->donor_id;
 
             return [
@@ -109,22 +159,7 @@ class CaseController extends Controller
                 'created_at' => $allocation->created_at,
                 'donorDisplay' => $donorId ? $donors->get($donorId) : null,
             ];
-        });
-
-        $presented = $this->presentCase($case);
-
-        $this->shareMeta([
-            'type' => 'article',
-            'title' => $this->pickLocale($case->public_title, app()->getLocale()),
-            'description' => Str::limit($this->pickLocale($case->public_story, app()->getLocale()) ?: 'Помогите собрать на этот кейс — каждый сом виден в публичном отчёте.', 160),
-            'image' => $presented['photoUrl'],
-            'url' => url()->current(),
-        ]);
-
-        return Inertia::render('Cases/Show', [
-            'case' => $presented,
-            'recentDonations' => $recentDonations,
-        ]);
+        })->all();
     }
 
     /**
