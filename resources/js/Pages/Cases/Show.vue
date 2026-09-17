@@ -695,11 +695,18 @@ function submit() {
             v-if="!donateCardVisible"
             class="fixed inset-x-0 bottom-0 z-40 border-t border-[#DCE6F0] bg-white p-3 shadow-[0_-4px_16px_rgba(2,1,163,0.12)] lg:hidden"
         >
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
                 <div class="flex flex-1 flex-col text-sm text-[#5B6472]">
                     <span class="font-heading font-bold text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</span>
                     <span class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor) }}</span>
                 </div>
+                <button
+                    type="button"
+                    class="font-heading rounded-lg border border-[#DCE6F0] px-4 py-2.5 font-bold text-[#101318] transition hover:border-brand-cyan"
+                    @click="quickShare"
+                >
+                    {{ t('share', locale()) }}
+                </button>
                 <button
                     type="button"
                     class="font-heading rounded-lg bg-brand-navy px-5 py-2.5 font-bold text-white transition hover:bg-brand-navy/90"
