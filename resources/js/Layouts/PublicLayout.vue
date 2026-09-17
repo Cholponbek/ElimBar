@@ -22,11 +22,20 @@ const supportMenuOpen = ref(false);
 <template>
     <div class="min-h-screen bg-[#F5F8FC] text-stone-900">
         <header class="border-b-[3px] border-brand-cyan bg-brand-navy">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-                <Link href="/">
+            <!-- На мобильном — 3 равные колонки (лого по центру, независимо
+                 от разной ширины "Нужна помощь?" слева и переключателя
+                 языка справа), на sm: и выше — обычный flex с лого слева
+                 и всем остальным одной группой справа, как было. -->
+            <div class="mx-auto grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3.5 sm:flex sm:max-w-6xl sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
+                <Link href="/help" class="text-sm font-medium text-white hover:text-brand-cyan sm:hidden">
+                    {{ t('nav_help', locale()) }}
+                </Link>
+
+                <Link href="/" class="justify-self-center sm:order-first sm:justify-self-auto">
                     <img src="/images/elimbar-logo-white.png" alt="Элим, барсыңбы?!" class="h-9 w-auto" />
                 </Link>
-                <div class="flex items-center gap-4">
+
+                <div class="flex items-center justify-end gap-4 sm:justify-normal">
                     <!-- Только от sm: и выше — на мобильном кнопка вплотную
                          к лого смотрится тесно, а выпадающее меню под ней
                          на узком экране не даёт выигрыша (кейсы и так
@@ -88,7 +97,7 @@ const supportMenuOpen = ref(false);
                             </div>
                         </template>
                     </div>
-                    <Link href="/help" class="text-sm font-medium text-white hover:text-brand-cyan">
+                    <Link href="/help" class="hidden text-sm font-medium text-white hover:text-brand-cyan sm:inline">
                         {{ t('nav_help', locale()) }}
                     </Link>
                     <span class="hidden text-sm text-white/70 sm:inline">{{ t('org_line', locale()) }}</span>
