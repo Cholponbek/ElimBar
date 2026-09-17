@@ -27,7 +27,11 @@ const supportMenuOpen = ref(false);
                     <img src="/images/elimbar-logo-white.png" alt="Элим, барсыңбы?!" class="h-9 w-auto" />
                 </Link>
                 <div class="flex items-center gap-4">
-                    <div class="relative">
+                    <!-- Только от sm: и выше — на мобильном кнопка вплотную
+                         к лого смотрится тесно, а выпадающее меню под ней
+                         на узком экране не даёт выигрыша (кейсы и так
+                         первым делом на витрине). -->
+                    <div class="relative hidden sm:block">
                         <button
                             type="button"
                             class="font-heading flex items-center gap-1 rounded-lg bg-brand-cyan px-3 py-1.5 text-sm font-bold text-brand-navy transition hover:bg-white"
