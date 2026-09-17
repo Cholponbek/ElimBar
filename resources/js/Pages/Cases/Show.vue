@@ -313,23 +313,14 @@ function submit() {
                 </div>
             </div>
 
+            <!-- "Поделиться" здесь не нужен отдельной кнопкой — она уже
+                 есть в карточке доната и в плавающей нижней панели,
+                 доступ к модалке шаринга и так под рукой везде. -->
             <div class="lg:col-start-1 lg:col-span-2 lg:row-start-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <button
-                        type="button"
-                        class="font-heading rounded-lg bg-brand-navy px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-navy/90"
-                        @click="shareModalRef.open()"
-                    >
-                        {{ t('share', locale()) }}
-                    </button>
-                </div>
-
-                <div class="mt-4">
-                    <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
-                        {{ pickLocale(props.case.story, locale()) }}
-                    </p>
-                    <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
-                </div>
+                <p v-if="pickLocale(props.case.story, locale())" class="whitespace-pre-line text-sm leading-relaxed text-[#374151] sm:text-base">
+                    {{ pickLocale(props.case.story, locale()) }}
+                </p>
+                <p v-else class="text-sm text-[#8B94A3]">{{ t('no_details_yet', locale()) }}</p>
             </div>
         </div>
 
