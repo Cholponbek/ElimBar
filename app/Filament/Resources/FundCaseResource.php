@@ -162,6 +162,26 @@ class FundCaseResource extends Resource
                             ->label('Принимает закят')
                             ->helperText('Религиозное ограничение — закят нельзя аллоцировать на кейс без этой отметки.'),
                     ]),
+
+                Forms\Components\Section::make('Сроки кейса')
+                    ->columns(3)
+                    ->schema([
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label('Дата начала')
+                            ->required(),
+                        Forms\Components\Toggle::make('is_indefinite')
+                            ->label('Бессрочный')
+                            ->live()
+                            ->dehydrated(false)
+                            ->afterStateHydrated(fn (Forms\Components\Toggle $component, ?FundCase $record) => $component->state($record?->end_date === null && $record?->exists)),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('Дата окончания')
+                            ->helperText('Оставьте пустым или включите «Бессрочный», если дата окончания ещё не определена.')
+                            ->visible(fn (Forms\Get $get) => ! $get('is_indefinite'))
+                            ->dehydratedWhenHidden()
+                            ->dehydrateStateUsing(fn (Forms\Get $get, $state) => $get('is_indefinite') ? null : $state)
+                            ->afterOrEqual('start_date'),
+                    ]),
             ]);
     }
 
