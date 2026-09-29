@@ -4,9 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CaseClosureResource\Pages;
 use App\Models\FundCase;
+use App\Support\CaseClosurePdfBuilder;
 use App\Support\CasePhotoProcessor;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -68,9 +71,10 @@ class CaseClosureResource extends Resource
                 Forms\Components\Section::make('Сроки кейса')
                     ->columns(3)
                     ->schema([
-                        Forms\Components\DatePicker::make('start_date')
+                        Forms\Components\Placeholder::make('start_date_display')
                             ->label('Дата начала')
-                            ->required(),
+                            ->content(fn (?FundCase $record) => $record?->created_at?->translatedFormat('d.m.Y') ?? '—')
+                            ->helperText('Не редактируется — всегда дата создания кейса.'),
                         Forms\Components\Toggle::make('is_indefinite')
                             ->label('Бессрочный')
                             ->live()
@@ -82,7 +86,7 @@ class CaseClosureResource extends Resource
                             ->visible(fn (Forms\Get $get) => ! $get('is_indefinite'))
                             ->dehydratedWhenHidden()
                             ->dehydrateStateUsing(fn (Forms\Get $get, $state) => $get('is_indefinite') ? null : $state)
-                            ->afterOrEqual('start_date'),
+                            ->afterOrEqual(fn (?FundCase $record) => ($record?->created_at ?? now())->toDateString()),
                     ]),
 
                 Forms\Components\Section::make('Статус')
@@ -160,6 +164,98 @@ class CaseClosureResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('Кейс')
+                    ->columns(2)
+                    ->schema([
+                        Infolists\Components\TextEntry::make('public_title.ru')
+                            ->label('Наименование'),
+                        Infolists\Components\TextEntry::make('public_story.ru')
+                            ->label('Краткое описание')
+                            ->limit(200)
+                            ->placeholder('—'),
+                        Infolists\Components\TextEntry::make('budget_minor')
+                            ->label('Нужно было собрать')
+                            ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
+                        Infolists\Components\TextEntry::make('allocated_minor')
+                            ->label('Собрано')
+                            ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
+                    ]),
+
+                Infolists\Components\Section::make('Сроки кейса')
+                    ->columns(3)
+                    ->schema([
+                        Infolists\Components\TextEntry::make('created_at')
+                            ->label('Дата начала')
+                            ->date('d.m.Y'),
+                        Infolists\Components\TextEntry::make('end_date')
+                            ->label('Дата окончания')
+                            ->date('d.m.Y')
+                            ->placeholder('Бессрочный'),
+                        Infolists\Components\TextEntry::make('status')
+                            ->label('Статус')
+                            ->badge()
+                            ->formatStateUsing(fn (string $state) => match ($state) {
+                                'draft' => 'Черновик',
+                                'active' => 'Активен',
+                                'closed' => 'Закрыт',
+                                default => $state,
+                            }),
+                    ]),
+
+                Infolists\Components\Section::make('Финансовые и юридические документы')
+                    ->schema([
+                        // ->state() (не ->formatStateUsing() на самом атрибуте) — Filament
+                        // для array-cast колонки вызывает formatStateUsing() на каждый
+                        // элемент по отдельности, а не на весь массив сразу.
+                        Infolists\Components\TextEntry::make('financial_documents_links')
+                            ->hiddenLabel()
+                            ->html()
+                            ->state(function (FundCase $record) {
+                                $paths = $record->financial_documents_paths ?? [];
+
+                                if (empty($paths)) {
+                                    return '—';
+                                }
+
+                                return collect($paths)
+                                    ->map(function (string $path) {
+                                        $url = Storage::disk('proofs')->temporaryUrl($path, now()->addMinutes(30));
+
+                                        return '<a href="'.e($url).'" target="_blank" class="underline">'.e(basename($path)).'</a>';
+                                    })
+                                    ->implode('<br>');
+                            }),
+                    ]),
+
+                Infolists\Components\Section::make('Отчёт по кейсу')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('closure_report_description.ru')
+                            ->hiddenLabel()
+                            ->placeholder('Описание не заполнено.'),
+                        Infolists\Components\ImageEntry::make('closure_report_photo_paths')
+                            ->label('Фото отчёта')
+                            ->disk('public')
+                            ->height(120),
+                    ]),
+
+                Infolists\Components\Actions::make([
+                    Infolists\Components\Actions\Action::make('download_pdf')
+                        ->label('Скачать PDF')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(fn (FundCase $record) => response()->streamDownload(
+                            function () use ($record) {
+                                echo CaseClosurePdfBuilder::build($record);
+                            },
+                            'case-'.$record->id.'-closure-report.pdf'
+                        )),
+                ]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -196,6 +292,7 @@ class CaseClosureResource extends Resource
         return [
             'index' => Pages\ListCaseClosures::route('/'),
             'edit' => Pages\EditCaseClosure::route('/{record}/edit'),
+            'view' => Pages\ViewCaseClosure::route('/{record}'),
         ];
     }
 }
