@@ -16,11 +16,13 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Throwable;
 
 /**
- * Отдельная вкладка «Закрытие кейса» — тот же кейс (FundCase), что и в
- * FundCaseResource, но форма сфокусирована на закрытии: сроки, финансовые/
- * юридические документы, отчёт о проведённых мероприятиях. Кейсы здесь не
- * создаются и не удаляются — только список существующих и переход в форму
- * закрытия конкретного кейса.
+ * Форма закрытия кейса — тот же кейс (FundCase), что и в FundCaseResource,
+ * но сфокусирована на закрытии: сроки, финансовые/юридические документы,
+ * отчёт о проведённых мероприятиях. Своей вкладки в навигации нет
+ * ($shouldRegisterNavigation = false) — открывается кнопкой «Закрыть» из
+ * таблицы FundCaseResource (см. её table()). Index-страница/роут всё ещё
+ * зарегистрированы (без этого Filament не строит breadcrumbs/кнопку «Назад»
+ * на edit-странице), но никуда не выводятся и нигде не линкуются напрямую.
  */
 class CaseClosureResource extends Resource
 {
@@ -28,15 +30,9 @@ class CaseClosureResource extends Resource
 
     protected static ?string $slug = 'case-closures';
 
-    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
-
-    protected static ?string $navigationLabel = 'Закрытие кейса';
-
-    protected static ?string $navigationGroup = 'Кейсы';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $modelLabel = 'закрытие кейса';
-
-    protected static ?string $pluralModelLabel = 'закрытие кейсов';
 
     public static function canCreate(): bool
     {
@@ -185,29 +181,6 @@ class CaseClosureResource extends Resource
                         'closed' => 'Закрыт',
                         default => $state,
                     }),
-                Tables\Columns\TextColumn::make('budget_minor')
-                    ->label('Нужно было')
-                    ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
-                Tables\Columns\TextColumn::make('allocated_minor')
-                    ->label('Собрано')
-                    ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
-                Tables\Columns\TextColumn::make('start_date')
-                    ->label('Начало')
-                    ->date('d.m.Y')
-                    ->placeholder('—'),
-                Tables\Columns\TextColumn::make('end_date')
-                    ->label('Конец')
-                    ->date('d.m.Y')
-                    ->placeholder('Бессрочный'),
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Статус')
-                    ->options([
-                        'draft' => 'Черновик',
-                        'active' => 'Активен',
-                        'closed' => 'Закрыт',
-                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
