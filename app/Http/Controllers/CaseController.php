@@ -44,6 +44,24 @@ class CaseController extends Controller
             'donationsCount' => (int) $donationsPerCase->get($case->id, 0),
         ]);
 
+        // «Мероприятия и отчёты» — закрытые кейсы с заполненным текстом
+        // отчёта (вкладка «Закрытие кейса» в админке). Только текст, без
+        // документов/фото — эти остаются приватными (см. миграцию
+        // expose_closure_report_on_cases_public_view).
+        $closedCaseReports = PublicCase::query()
+            ->where('status', 'closed')
+            ->whereNotNull('closure_report_description')
+            ->orderByDesc('closed_at')
+            ->get()
+            ->map(fn (PublicCase $case) => [
+                'id' => $case->id,
+                'title' => $case->public_title,
+                'closedAt' => $case->closed_at,
+                'report' => $case->closure_report_description,
+            ])
+            ->filter(fn (array $item) => filled($item['report']['ru'] ?? null) || filled($item['report']['ky'] ?? null))
+            ->values();
+
         $this->shareMeta([
             'description' => 'Каждый сом привязан к конкретному кейсу — публичный отчёт собирается автоматически.',
         ]);
@@ -56,6 +74,7 @@ class CaseController extends Controller
 
         return Inertia::render('Cases/Index', [
             'cases' => $presented,
+            'closedCaseReports' => $closedCaseReports,
             'stats' => [
                 'activeCases' => $cases->count(),
                 'raisedMinor' => (int) $cases->sum('allocated_minor'),

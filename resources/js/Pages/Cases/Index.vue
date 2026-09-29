@@ -6,6 +6,7 @@ import { categoryLabel as categoryLabelFor, donationsWord, t } from '../../i18n.
 
 const props = defineProps({
     cases: { type: Array, required: true },
+    closedCaseReports: { type: Array, default: () => [] },
     stats: { type: Object, required: true },
     siteSettings: { type: Object, default: null },
 });
@@ -17,6 +18,8 @@ const categoryLabel = (category) => categoryLabelFor(category, locale());
 const donationsLabel = (n) => donationsWord(n, locale());
 
 const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.allocated_minor / c.budget_minor) * 100)) : 0);
+
+const formatClosedDate = (isoString) => new Date(isoString).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
 </script>
 
 <template>
@@ -123,6 +126,26 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                 </div>
             </Link>
         </div>
+
+        <section v-if="closedCaseReports.length > 0" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
+            <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('reports_heading', locale()) }}</h2>
+
+            <div class="mt-6 space-y-6">
+                <article
+                    v-for="report in closedCaseReports"
+                    :key="report.id"
+                    class="rounded-[10px] border border-[#DCE6F0] bg-white p-5"
+                >
+                    <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                        <h3 class="font-heading text-[15.5px] font-bold text-[#101318]">{{ pickLocale(report.title, locale()) }}</h3>
+                        <span class="text-xs text-[#8B94A3]">{{ t('report_closed_on', locale()) }}: {{ formatClosedDate(report.closedAt) }}</span>
+                    </div>
+                    <p class="mt-3 whitespace-pre-line text-left text-sm leading-relaxed text-[#3D4655]">
+                        {{ pickLocale(report.report, locale()) }}
+                    </p>
+                </article>
+            </div>
+        </section>
 
         <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 text-center sm:grid-cols-2 sm:text-left">
             <div v-if="pickLocale(siteSettings.aboutBody, locale())">
