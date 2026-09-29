@@ -29,7 +29,7 @@ class FundCase extends Model
         'request_id', 'campaign_id', 'beneficiary_id', 'category', 'status',
         'public_title', 'public_story', 'public_photo_id', 'public_photo_path',
         'public_photo_paths', 'currency', 'budget_minor', 'allows_zakat', 'closed_at',
-        'start_date', 'end_date', 'financial_documents_paths',
+        'end_date', 'financial_documents_paths',
         'closure_report_description', 'closure_report_photo_paths',
     ];
 
@@ -42,7 +42,6 @@ class FundCase extends Model
         'disbursed_minor' => 'integer',
         'allows_zakat' => 'boolean',
         'closed_at' => 'datetime',
-        'start_date' => 'date',
         'end_date' => 'date',
         'financial_documents_paths' => 'array',
         'closure_report_description' => 'array',

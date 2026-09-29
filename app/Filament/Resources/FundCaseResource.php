@@ -166,9 +166,10 @@ class FundCaseResource extends Resource
                 Forms\Components\Section::make('Сроки кейса')
                     ->columns(3)
                     ->schema([
-                        Forms\Components\DatePicker::make('start_date')
+                        Forms\Components\Placeholder::make('start_date_display')
                             ->label('Дата начала')
-                            ->required(),
+                            ->content(fn (?FundCase $record) => $record?->exists ? $record->created_at->translatedFormat('d.m.Y') : 'Будет проставлена автоматически при создании кейса')
+                            ->helperText('Не редактируется — всегда дата создания кейса.'),
                         Forms\Components\Toggle::make('is_indefinite')
                             ->label('Бессрочный')
                             ->live()
@@ -180,7 +181,7 @@ class FundCaseResource extends Resource
                             ->visible(fn (Forms\Get $get) => ! $get('is_indefinite'))
                             ->dehydratedWhenHidden()
                             ->dehydrateStateUsing(fn (Forms\Get $get, $state) => $get('is_indefinite') ? null : $state)
-                            ->afterOrEqual('start_date'),
+                            ->afterOrEqual(fn (?FundCase $record) => ($record?->created_at ?? now())->toDateString()),
                     ]),
             ]);
     }

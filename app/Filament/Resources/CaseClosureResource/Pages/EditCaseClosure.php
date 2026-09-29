@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CaseClosureResource\Pages;
 
 use App\Filament\Resources\CaseClosureResource;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCaseClosure extends EditRecord
@@ -18,5 +19,17 @@ class EditCaseClosure extends EditRecord
         }
 
         return $data;
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+            Action::make('report')
+                ->label('Отчёт')
+                ->color('gray')
+                ->url(fn () => CaseClosureResource::getUrl('view', ['record' => $this->record])),
+            $this->getCancelFormAction(),
+        ];
     }
 }
