@@ -229,6 +229,11 @@ class FundCaseResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('close')
+                    ->label('Закрыть')
+                    ->icon('heroicon-o-archive-box')
+                    ->color('gray')
+                    ->url(fn (FundCase $record) => CaseClosureResource::getUrl('edit', ['record' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
