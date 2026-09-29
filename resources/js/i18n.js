@@ -80,6 +80,9 @@ const translations = {
         email: 'Email',
         social_networks: 'Соцсети',
 
+        reports_heading: 'Мероприятия и отчёты',
+        report_closed_on: 'Закрыт',
+
         story_collected_suffix: 'собрано',
         story_goal_prefix: 'Цель —',
     },
@@ -156,6 +159,9 @@ const translations = {
         address: 'Дарек',
         email: 'Email',
         social_networks: 'Социалдык тармактар',
+
+        reports_heading: 'Иш-чаралар жана отчёттор',
+        report_closed_on: 'Жабылды',
 
         story_collected_suffix: 'жыйналды',
         story_goal_prefix: 'Максат —',

@@ -41,5 +41,6 @@ class PublicCase extends Model
         'closed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'closure_report_description' => 'array',
     ];
 }
