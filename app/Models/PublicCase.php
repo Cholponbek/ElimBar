@@ -42,5 +42,7 @@ class PublicCase extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'closure_report_description' => 'array',
+        'end_date' => 'date',
+        'closure_report_photo_paths' => 'array',
     ];
 }

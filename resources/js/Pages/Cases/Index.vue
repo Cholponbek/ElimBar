@@ -18,8 +18,6 @@ const categoryLabel = (category) => categoryLabelFor(category, locale());
 const donationsLabel = (n) => donationsWord(n, locale());
 
 const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.allocated_minor / c.budget_minor) * 100)) : 0);
-
-const formatClosedDate = (isoString) => new Date(isoString).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
 </script>
 
 <template>
@@ -130,20 +128,46 @@ const formatClosedDate = (isoString) => new Date(isoString).toLocaleDateString('
         <section v-if="closedCaseReports.length > 0" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
             <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('reports_heading', locale()) }}</h2>
 
-            <div class="mt-6 space-y-6">
-                <article
-                    v-for="report in closedCaseReports"
-                    :key="report.id"
-                    class="rounded-[10px] border border-[#DCE6F0] bg-white p-5"
+            <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <Link
+                    v-for="c in closedCaseReports"
+                    :key="c.id"
+                    :href="`/cases/${c.id}/report`"
+                    class="block overflow-hidden rounded-[10px] border border-[#DCE6F0] bg-white transition hover:border-brand-cyan hover:shadow-[0_4px_16px_rgba(2,1,163,0.08)]"
                 >
-                    <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                        <h3 class="font-heading text-[15.5px] font-bold text-[#101318]">{{ pickLocale(report.title, locale()) }}</h3>
-                        <span class="text-xs text-[#8B94A3]">{{ t('report_closed_on', locale()) }}: {{ formatClosedDate(report.closedAt) }}</span>
+                    <div class="relative">
+                        <div class="h-1 bg-brand-cyan" />
+                        <img
+                            v-if="c.photoUrl"
+                            :src="c.photoUrl"
+                            :alt="pickLocale(c.title, locale())"
+                            class="aspect-video w-full object-cover"
+                        />
+                        <div v-else class="aspect-video w-full bg-gradient-to-br from-brand-blue to-brand-navy" />
+                        <span class="font-heading absolute bottom-2 right-2 rounded-full bg-brand-navy/85 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                            {{ t('status_closed', locale()) }}
+                        </span>
                     </div>
-                    <p class="mt-3 whitespace-pre-line text-left text-sm leading-relaxed text-[#3D4655]">
-                        {{ pickLocale(report.report, locale()) }}
-                    </p>
-                </article>
+                    <div class="flex flex-col gap-2.5 p-4">
+                        <div class="font-heading text-[11px] font-bold uppercase tracking-wider text-brand-cyan">
+                            {{ categoryLabel(c.category) }}
+                        </div>
+                        <h3 class="font-heading text-[15.5px] font-bold leading-snug text-[#101318]">
+                            {{ pickLocale(c.title, locale()) }}
+                        </h3>
+
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
+                                <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                            </div>
+                            <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
+                        </div>
+                        <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                            <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
+                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
+                        </div>
+                    </div>
+                </Link>
             </div>
         </section>
 

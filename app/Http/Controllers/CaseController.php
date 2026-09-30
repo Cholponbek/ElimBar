@@ -45,21 +45,20 @@ class CaseController extends Controller
         ]);
 
         // «Мероприятия и отчёты» — закрытые кейсы с заполненным текстом
-        // отчёта (вкладка «Закрытие кейса» в админке). Только текст, без
-        // документов/фото — эти остаются приватными (см. миграцию
-        // expose_closure_report_on_cases_public_view).
+        // отчёта (вкладка «Закрытие кейса» в админке). Карточки в том же
+        // виде, что и «Кейсы, которым нужна помощь» (presentCase), клик
+        // ведёт на report() — там уже полный отчёт с фото. Финансовые
+        // документы туда не попадают — остаются приватными.
         $closedCaseReports = PublicCase::query()
             ->where('status', 'closed')
             ->whereNotNull('closure_report_description')
             ->orderByDesc('closed_at')
             ->get()
+            ->filter(fn (PublicCase $case) => filled($case->closure_report_description['ru'] ?? null) || filled($case->closure_report_description['ky'] ?? null))
             ->map(fn (PublicCase $case) => [
-                'id' => $case->id,
-                'title' => $case->public_title,
+                ...$this->presentCase($case),
                 'closedAt' => $case->closed_at,
-                'report' => $case->closure_report_description,
             ])
-            ->filter(fn (array $item) => filled($item['report']['ru'] ?? null) || filled($item['report']['ky'] ?? null))
             ->values();
 
         $this->shareMeta([
@@ -120,6 +119,40 @@ class CaseController extends Controller
             'case' => $presented,
             'recentDonations' => $recentDonations,
             'donationsCount' => $donationsCount,
+        ]);
+    }
+
+    /**
+     * Публичный read-only отчёт по закрытому кейсу — то же самое, что видит
+     * админ на странице «Закрытие кейса», минус финансовые/юридические
+     * документы (те остаются приватными). closure_report_photo_paths —
+     * фото отчёта, отдельно от карусели public_photo_paths.
+     */
+    public function report(int $case): Response
+    {
+        $case = PublicCase::query()->where('status', 'closed')->findOrFail($case);
+
+        $presented = $this->presentCase($case);
+
+        $this->shareMeta([
+            'type' => 'article',
+            'title' => $this->pickLocale($case->public_title, app()->getLocale()),
+            'description' => Str::limit($this->pickLocale($case->closure_report_description, app()->getLocale()) ?: '', 160),
+            'image' => $presented['photoUrl'],
+            'url' => url()->current(),
+        ]);
+
+        return Inertia::render('Cases/Report', [
+            'case' => [
+                ...$presented,
+                'startDate' => $case->created_at,
+                'endDate' => $case->end_date,
+                'closedAt' => $case->closed_at,
+                'report' => $case->closure_report_description,
+                'reportPhotoUrls' => collect($case->closure_report_photo_paths ?? [])
+                    ->map(fn (string $path) => Storage::disk('public')->url($path))
+                    ->values(),
+            ],
         ]);
     }
 
