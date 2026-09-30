@@ -128,6 +128,9 @@ class CaseClosureResource extends Resource
                         Forms\Components\Textarea::make('closure_report_description.ru')
                             ->label('Описание (русский)')
                             ->rows(4),
+                        Forms\Components\Textarea::make('closure_report_description.en')
+                            ->label('Description (English)')
+                            ->rows(4),
                         Forms\Components\FileUpload::make('closure_report_photo_paths')
                             ->label('Фото отчёта')
                             ->helperText('Можно загрузить несколько фото — серверный проход через CasePhotoProcessor пережимает их без заметной потери качества.')

@@ -74,7 +74,7 @@ class FundCaseResource extends Resource
 
                 Forms\Components\Section::make('Публичная карточка')
                     ->description('Видно донорам на витрине — без ФИО и других данных бенефициара.')
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\TextInput::make('public_title.ky')
                             ->label('Заголовок (кыргызча)')
@@ -84,11 +84,17 @@ class FundCaseResource extends Resource
                             ->label('Заголовок (русский)')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\TextInput::make('public_title.en')
+                            ->label('Title (English)')
+                            ->maxLength(255),
                         Forms\Components\Textarea::make('public_story.ky')
                             ->label('История (кыргызча)')
                             ->rows(4),
                         Forms\Components\Textarea::make('public_story.ru')
                             ->label('История (русский)')
+                            ->rows(4),
+                        Forms\Components\Textarea::make('public_story.en')
+                            ->label('Story (English)')
                             ->rows(4),
                         Forms\Components\FileUpload::make('public_photo_paths')
                             ->label('Фото (карусель)')

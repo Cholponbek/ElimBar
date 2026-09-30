@@ -120,7 +120,7 @@ const formatDate = (isoString) =>
                                 <span class="text-[#8B94A3]">{{ formatDate(donation.created_at) }}</span>
                                 <span v-if="donation.donorDisplay" class="text-xs text-[#8B94A3]">{{ donation.donorDisplay }}</span>
                             </span>
-                            <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor) }}</span>
+                            <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor, locale()) }}</span>
                         </li>
                     </ul>
                 </div>

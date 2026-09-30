@@ -42,7 +42,7 @@ class SiteSettingsPage extends Page implements HasForms
             ->schema([
                 Forms\Components\Section::make('О нас')
                     ->description('Показывается блоком на главной странице сайта.')
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\TextInput::make('about_title.ky')
                             ->label('Заголовок (кыргызча)')
@@ -50,23 +50,32 @@ class SiteSettingsPage extends Page implements HasForms
                         Forms\Components\TextInput::make('about_title.ru')
                             ->label('Заголовок (русский)')
                             ->maxLength(255),
+                        Forms\Components\TextInput::make('about_title.en')
+                            ->label('Title (English)')
+                            ->maxLength(255),
                         Forms\Components\Textarea::make('about_body.ky')
                             ->label('Текст (кыргызча)')
                             ->rows(6),
                         Forms\Components\Textarea::make('about_body.ru')
                             ->label('Текст (русский)')
                             ->rows(6),
+                        Forms\Components\Textarea::make('about_body.en')
+                            ->label('Text (English)')
+                            ->rows(6),
                     ]),
 
                 Forms\Components\Section::make('Контакты')
                     ->description('Показывается блоком на главной странице сайта.')
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\TextInput::make('contact_address.ky')
                             ->label('Адрес (кыргызча)')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('contact_address.ru')
                             ->label('Адрес (русский)')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('contact_address.en')
+                            ->label('Address (English)')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('contact_phone')
                             ->label('Телефон')

@@ -258,7 +258,7 @@ async function buildStoryImage() {
     });
     cursorY += STORY_TITLE.gapAfter;
 
-    const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor)} ${t('story_collected_suffix', locale())}`, pad, cursorY, {
+    const statPill = drawPill(ctx, `${formatSom(props.case.allocated_minor, locale())} ${t('story_collected_suffix', locale())}`, pad, cursorY, {
         font: `800 ${STORY_STAT.fontSize}px ${STORY_FONT}`,
         textColor: STORY_INK,
         bgColor: STORY_ACCENT,
@@ -286,7 +286,7 @@ async function buildStoryImage() {
 
     ctx.font = `600 34px ${STORY_FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText(`${t('story_goal_prefix', locale())} ${formatSom(props.case.budget_minor)}`, pad, cursorY);
+    ctx.fillText(`${t('story_goal_prefix', locale())} ${formatSom(props.case.budget_minor, locale())}`, pad, cursorY);
     cursorY += STORY_GOAL_BLOCK;
 
     const ctaPill = drawPill(ctx, `${t('support', locale())} →`, pad, cursorY, {

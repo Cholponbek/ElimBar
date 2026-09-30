@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class SetLocaleFromCookie
 {
-    public const array SUPPORTED = ['ru', 'ky'];
+    public const array SUPPORTED = ['ru', 'ky', 'en'];
 
     public function handle(Request $request, Closure $next): Response
     {

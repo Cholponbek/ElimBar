@@ -49,11 +49,11 @@ const formatDate = (isoString) =>
                     </div>
                     <div class="flex justify-between border-t border-[#EEF3F8] pt-3">
                         <span>{{ t('report_needed', locale()) }}</span>
-                        <b class="text-[#101318]">{{ formatSom(props.case.budget_minor) }}</b>
+                        <b class="text-[#101318]">{{ formatSom(props.case.budget_minor, locale()) }}</b>
                     </div>
                     <div class="flex justify-between">
                         <span>{{ t('collected', locale()) }}</span>
-                        <b class="text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b>
+                        <b class="text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</b>
                     </div>
                 </dl>
             </section>
