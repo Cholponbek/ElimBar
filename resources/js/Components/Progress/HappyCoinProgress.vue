@@ -5,6 +5,8 @@ import { lerpColor } from './colorLerp.js';
 // Тема «Добрая монета»: на 0% — грустная серебристая монета, по мере
 // сбора цвет теплеет до золотого и рот выгибается из грустной дуги в
 // улыбку; при высоком прогрессе появляются искорки радости по бокам.
+// Плюс лёгкая непрерывная анимация (CSS) — покачивание, моргание и
+// бегущий блик (имитация объёма/3D), чтобы монета не была статичной.
 const props = defineProps({
     progress: { type: Number, required: true },
 });
@@ -27,15 +29,28 @@ const sparkleOpacity = computed(() => Math.max(0, (t.value - 0.7) / 0.3));
 <template>
     <div class="relative h-20 w-20 flex-shrink-0">
         <svg viewBox="0 0 96 96" class="h-20 w-20">
-            <circle cx="48" cy="48" r="40" :fill="bodyColor" />
-            <circle cx="48" cy="48" r="33" fill="none" :stroke="ringColor" stroke-width="2.5" stroke-dasharray="4 3" />
+            <defs>
+                <clipPath id="coin-clip">
+                    <circle cx="48" cy="48" r="40" />
+                </clipPath>
+            </defs>
 
-            <circle cx="38" cy="44" r="3" fill="#3D4655" />
-            <circle cx="58" cy="44" r="3" fill="#3D4655" />
+            <g class="coin-sway">
+                <circle cx="48" cy="48" r="40" :fill="bodyColor" />
+                <circle cx="48" cy="48" r="33" fill="none" :stroke="ringColor" stroke-width="2.5" stroke-dasharray="4 3" />
 
-            <path :d="mouthPath" fill="none" stroke="#3D4655" stroke-width="3" stroke-linecap="round" />
+                <!-- бегущий блик — имитация объёма/3D на плоской монете -->
+                <ellipse cx="30" cy="30" rx="10" ry="22" fill="white" opacity="0.35" class="coin-shine" clip-path="url(#coin-clip)" />
 
-            <g :opacity="sparkleOpacity" stroke="#F5C542" stroke-width="2" stroke-linecap="round">
+                <g class="coin-blink">
+                    <circle cx="38" cy="44" r="3" fill="#3D4655" />
+                    <circle cx="58" cy="44" r="3" fill="#3D4655" />
+                </g>
+
+                <path :d="mouthPath" fill="none" stroke="#3D4655" stroke-width="3" stroke-linecap="round" />
+            </g>
+
+            <g :opacity="sparkleOpacity" stroke="#F5C542" stroke-width="2" stroke-linecap="round" class="coin-sparkle">
                 <path d="M16 30 l3 3 M16 36 l3 -3" />
                 <path d="M80 30 l-3 3 M80 36 l-3 -3" />
             </g>
@@ -45,3 +60,60 @@ const sparkleOpacity = computed(() => Math.max(0, (t.value - 0.7) / 0.3));
         </span>
     </div>
 </template>
+
+<style scoped>
+.coin-sway {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: coin-sway 3.4s ease-in-out infinite;
+}
+
+.coin-shine {
+    animation: coin-shine 3.4s ease-in-out infinite;
+}
+
+.coin-blink {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: coin-blink 4.5s ease-in-out infinite;
+}
+
+.coin-sparkle path {
+    animation: sparkle-twinkle 1.4s ease-in-out infinite;
+}
+
+.coin-sparkle path:last-child {
+    animation-delay: 0.5s;
+}
+
+@keyframes coin-sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+@keyframes coin-shine {
+    0% { transform: translateX(-6px); opacity: 0; }
+    45% { opacity: 0.35; }
+    55% { opacity: 0.35; }
+    100% { transform: translateX(64px); opacity: 0; }
+}
+
+@keyframes coin-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96% { transform: scaleY(0.1); }
+}
+
+@keyframes sparkle-twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coin-sway,
+    .coin-shine,
+    .coin-blink,
+    .coin-sparkle path {
+        animation: none;
+    }
+}
+</style>
