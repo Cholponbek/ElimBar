@@ -84,6 +84,7 @@ const translations = {
         email: 'Электронная почта',
         reception_phone: 'Приёмное отделение',
         partnership_phone: 'По вопросам сотрудничества и спонсорства',
+        working_hours: 'График работы',
         website: 'Официальный сайт',
         social_networks: 'Соцсети',
 
@@ -182,6 +183,7 @@ const translations = {
         email: 'Электрондук почта',
         reception_phone: 'Кабыл алуу бөлүмү',
         partnership_phone: 'Кызматташтык жана демөөрчүлүк маселелери боюнча',
+        working_hours: 'Иштөө убактысы',
         website: 'Расмий сайт',
         social_networks: 'Социалдык тармактар',
 
@@ -280,6 +282,7 @@ const translations = {
         email: 'Email',
         reception_phone: 'Reception desk',
         partnership_phone: 'Partnerships and sponsorship',
+        working_hours: 'Working hours',
         website: 'Official website',
         social_networks: 'Social media',
 

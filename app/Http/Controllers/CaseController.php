@@ -89,7 +89,7 @@ class CaseController extends Controller
                 'contactReceptionPhone' => $siteSettings->contact_reception_phone,
                 'contactPartnershipPhone' => $siteSettings->contact_partnership_phone,
                 'contactEmail' => $siteSettings->contact_email,
-                'contactEmailSecondary' => $siteSettings->contact_email_secondary,
+                'contactWorkingHours' => $siteSettings->contact_working_hours,
                 'contactWebsite' => $siteSettings->contact_website,
                 'contactInstagram' => $siteSettings->contact_instagram,
             ] : null,

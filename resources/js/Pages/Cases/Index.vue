@@ -252,11 +252,9 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
                     </dd>
                 </div>
-                <div v-if="siteSettings.contactEmailSecondary">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
-                    <dd class="mt-0.5">
-                        <a :href="`mailto:${siteSettings.contactEmailSecondary}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmailSecondary }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactWorkingHours">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('working_hours', locale()) }}</dt>
+                    <dd class="mt-0.5">{{ siteSettings.contactWorkingHours }}</dd>
                 </div>
                 <div v-if="siteSettings.contactWebsite">
                     <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">🌐 {{ t('website', locale()) }}</dt>
