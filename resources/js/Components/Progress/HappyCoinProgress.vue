@@ -13,7 +13,8 @@ const props = defineProps({
 
 const t = computed(() => Math.max(0, Math.min(100, props.progress)) / 100);
 
-const bodyColor = computed(() => lerpColor('#C9CDD3', '#F5C542', t.value));
+const bodyLight = computed(() => lerpColor('#E1E4E8', '#FFE58A', t.value));
+const bodyDark = computed(() => lerpColor('#A7ACB4', '#D89B1F', t.value));
 const ringColor = computed(() => lerpColor('#9CA3AF', '#C8901A', t.value));
 
 // Рот — квадратичная кривая с концами в (38,58)/(58,58). Control point
@@ -28,15 +29,21 @@ const sparkleOpacity = computed(() => Math.max(0, (t.value - 0.7) / 0.3));
 
 <template>
     <div class="relative h-20 w-20 flex-shrink-0">
-        <svg viewBox="0 0 96 96" class="h-20 w-20">
+        <svg viewBox="0 0 96 96" class="h-20 w-20 coin-icon">
             <defs>
                 <clipPath id="coin-clip">
                     <circle cx="48" cy="48" r="40" />
                 </clipPath>
+                <linearGradient id="coin-body-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" :stop-color="bodyLight" />
+                    <stop offset="100%" :stop-color="bodyDark" />
+                </linearGradient>
             </defs>
 
+            <ellipse cx="48" cy="88" rx="24" ry="4" fill="#0201A3" opacity="0.12" />
+
             <g class="coin-sway">
-                <circle cx="48" cy="48" r="40" :fill="bodyColor" />
+                <circle cx="48" cy="48" r="40" fill="url(#coin-body-grad)" />
                 <circle cx="48" cy="48" r="33" fill="none" :stroke="ringColor" stroke-width="2.5" stroke-dasharray="4 3" />
 
                 <!-- бегущий блик — имитация объёма/3D на плоской монете -->
@@ -62,6 +69,10 @@ const sparkleOpacity = computed(() => Math.max(0, (t.value - 0.7) / 0.3));
 </template>
 
 <style scoped>
+.coin-icon {
+    filter: drop-shadow(0 3px 3px rgba(2, 1, 163, 0.25));
+}
+
 .coin-sway {
     transform-box: fill-box;
     transform-origin: center;
