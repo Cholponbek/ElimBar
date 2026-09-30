@@ -167,6 +167,16 @@ class FundCaseResource extends Resource
                         Forms\Components\Toggle::make('allows_zakat')
                             ->label('Принимает закят')
                             ->helperText('Религиозное ограничение — закят нельзя аллоцировать на кейс без этой отметки.'),
+                        Forms\Components\Select::make('progress_theme')
+                            ->label('Тема индикатора сбора')
+                            ->options([
+                                'default' => 'Обычное кольцо',
+                                'warmth_house' => '«Подарите тепло» — дом, который греется',
+                                'happy_coin' => '«Добрая монета» — монета, которая улыбается',
+                            ])
+                            ->default('default')
+                            ->required()
+                            ->helperText('Визуальный индикатор прогресса сбора на странице кейса вместо обычного кольца.'),
                     ]),
 
                 Forms\Components\Section::make('Сроки кейса')
@@ -235,6 +245,14 @@ class FundCaseResource extends Resource
                 Tables\Columns\TextColumn::make('disbursed_minor')
                     ->label('Выплачено')
                     ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
+                Tables\Columns\TextColumn::make('progress_theme')
+                    ->label('Тема индикатора')
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'warmth_house' => 'Подарите тепло',
+                        'happy_coin' => 'Добрая монета',
+                        default => 'Обычное кольцо',
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
