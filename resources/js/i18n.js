@@ -24,6 +24,7 @@ const translations = {
         no_active_cases: 'Пока нет активных кейсов.',
         collected: 'Собрано',
         goal: 'Цель',
+        budget_unlimited: 'Без ограничения бюджета',
 
         category_medical: 'Лечение',
         category_winter_food: 'Зимняя продуктовая помощь',
@@ -115,6 +116,7 @@ const translations = {
         no_active_cases: 'Азырынча активдүү кейстер жок.',
         collected: 'Жыйналды',
         goal: 'Максат',
+        budget_unlimited: 'Бюджет чектелген эмес',
 
         category_medical: 'Дарылоо',
         category_winter_food: 'Кышкы азык-түлүк жардамы',
@@ -206,6 +208,7 @@ const translations = {
         no_active_cases: 'No active cases yet.',
         collected: 'Raised',
         goal: 'Goal',
+        budget_unlimited: 'No budget limit',
 
         category_medical: 'Medical treatment',
         category_winter_food: 'Winter food aid',

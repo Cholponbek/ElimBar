@@ -111,15 +111,21 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         {{ pickLocale(c.title, locale()) }}
                     </h2>
 
-                    <div class="flex items-center gap-2.5">
-                        <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
-                            <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                    <template v-if="c.budget_minor !== null">
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
+                                <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                            </div>
+                            <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                         </div>
-                        <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
-                    </div>
-                    <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                        <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                            <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
+                        </div>
+                    </template>
+                    <div v-else class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
                         <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
-                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
+                        <span class="text-[#8B94A3]">{{ t('budget_unlimited', locale()) }}</span>
                     </div>
                 </div>
             </Link>
@@ -156,15 +162,21 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                             {{ pickLocale(c.title, locale()) }}
                         </h3>
 
-                        <div class="flex items-center gap-2.5">
-                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
-                                <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                        <template v-if="c.budget_minor !== null">
+                            <div class="flex items-center gap-2.5">
+                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
+                                    <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                                </div>
+                                <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                             </div>
-                            <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
-                        </div>
-                        <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                            <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                                <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                                <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
+                            </div>
+                        </template>
+                        <div v-else class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
                             <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
-                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
+                            <span class="text-[#8B94A3]">{{ t('budget_unlimited', locale()) }}</span>
                         </div>
                     </div>
                 </Link>

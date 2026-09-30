@@ -130,7 +130,7 @@ class RequestResource extends Resource
                             ->label('Утверждённый бюджет, сом')
                             ->numeric()
                             ->minValue(0)
-                            ->required(),
+                            ->helperText('Оставьте пустым, если бюджет не ограничен.'),
                         Forms\Components\Toggle::make('allows_zakat')
                             ->label('Принимает закят'),
                     ])
@@ -146,7 +146,7 @@ class RequestResource extends Resource
                                     'ru' => $data['public_title_ru'],
                                 ],
                                 'currency' => $record->currency,
-                                'budget_minor' => (int) round(((float) $data['budget_minor']) * 100),
+                                'budget_minor' => filled($data['budget_minor']) ? (int) round(((float) $data['budget_minor']) * 100) : null,
                                 'allows_zakat' => $data['allows_zakat'] ?? false,
                             ]);
 

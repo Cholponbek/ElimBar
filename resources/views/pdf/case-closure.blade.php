@@ -29,7 +29,7 @@
         </tr>
         <tr>
             <td class="label">Нужно было собрать</td>
-            <td>{{ number_format($case->budget_minor / 100, 0, '.', ' ') }} сом</td>
+            <td>{{ $case->budget_minor === null ? 'Не ограничен' : number_format($case->budget_minor / 100, 0, '.', ' ').' сом' }}</td>
         </tr>
         <tr>
             <td class="label">Собрано</td>

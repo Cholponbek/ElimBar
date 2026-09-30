@@ -173,7 +173,7 @@ function submit() {
                      "Поддержать" уже давно прокручена мимо экрана. -->
                 <div ref="donateCardEl" class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
-                        <div class="relative h-20 w-20 flex-shrink-0">
+                        <div v-if="props.case.budget_minor !== null" class="relative h-20 w-20 flex-shrink-0">
                             <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
                                 <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
                                 <circle
@@ -190,7 +190,8 @@ function submit() {
                         </div>
                         <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
                             <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</b></span>
-                            <span class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
+                            <span v-if="props.case.budget_minor !== null" class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
+                            <span v-else class="text-xs text-[#8B94A3]">{{ t('budget_unlimited', locale()) }}</span>
                         </div>
                     </div>
 
@@ -358,7 +359,8 @@ function submit() {
             <div class="flex items-center gap-2">
                 <div class="flex flex-1 flex-col text-sm text-[#5B6472]">
                     <span class="font-heading font-bold text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</span>
-                    <span class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
+                    <span v-if="props.case.budget_minor !== null" class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
+                    <span v-else class="text-xs text-[#8B94A3]">{{ t('budget_unlimited', locale()) }}</span>
                 </div>
                 <button
                     type="button"

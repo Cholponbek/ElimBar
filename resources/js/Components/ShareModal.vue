@@ -267,16 +267,17 @@ async function buildStoryImage() {
     });
     cursorY += statPill.height + STORY_STAT.gapAfter;
 
+    const hasGoal = props.case.budget_minor !== null;
     const barH = STORY_BAR.height;
     ctx.font = `800 52px ${STORY_FONT}`;
-    const percentText = `${progressPercent()}%`;
+    const percentText = hasGoal ? `${progressPercent()}%` : '';
     const percentWidth = ctx.measureText(percentText).width;
     const barW = contentWidth - percentWidth - 28;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     roundRect(ctx, pad, cursorY, barW, barH, barH / 2);
     ctx.fill();
     ctx.fillStyle = STORY_ACCENT;
-    roundRect(ctx, pad, cursorY, barW * (progressPercent() / 100), barH, barH / 2);
+    roundRect(ctx, pad, cursorY, barW * (hasGoal ? progressPercent() / 100 : 1), barH, barH / 2);
     ctx.fill();
     ctx.fillStyle = '#ffffff';
     ctx.textBaseline = 'middle';
@@ -286,7 +287,7 @@ async function buildStoryImage() {
 
     ctx.font = `600 34px ${STORY_FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText(`${t('story_goal_prefix', locale())} ${formatSom(props.case.budget_minor, locale())}`, pad, cursorY);
+    ctx.fillText(`${t('story_goal_prefix', locale())} ${hasGoal ? formatSom(props.case.budget_minor, locale()) : t('budget_unlimited', locale())}`, pad, cursorY);
     cursorY += STORY_GOAL_BLOCK;
 
     const ctaPill = drawPill(ctx, `${t('support', locale())} →`, pad, cursorY, {

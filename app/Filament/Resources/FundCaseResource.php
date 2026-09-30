@@ -152,9 +152,9 @@ class FundCaseResource extends Resource
                             ->label('Бюджет, сом')
                             ->numeric()
                             ->minValue(0)
-                            ->required()
+                            ->helperText('Оставьте пустым, если бюджет не ограничен.')
                             ->afterStateHydrated(fn (Forms\Components\TextInput $component, $state) => $component->state($state !== null ? $state / 100 : null))
-                            ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
+                            ->dehydrateStateUsing(fn ($state) => filled($state) ? (int) round(((float) $state) * 100) : null),
                         Forms\Components\Select::make('status')
                             ->label('Статус')
                             ->options([
@@ -226,6 +226,11 @@ class FundCaseResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('budget_minor')
                     ->label('Бюджет')
+                    // ->placeholder(), не null-ветка в formatStateUsing(): Filament
+                    // оборачивает состояние в Arr::wrap() перед рендером, а
+                    // Arr::wrap(null) === [] — formatStateUsing на null вообще не
+                    // вызывается, ячейка тихо пустая без явного плейсхолдера.
+                    ->placeholder('Не ограничен')
                     ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
                 Tables\Columns\TextColumn::make('disbursed_minor')
                     ->label('Выплачено')
