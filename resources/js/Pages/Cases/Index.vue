@@ -74,7 +74,10 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
             </section>
         </template>
 
-        <h2 id="cases" class="font-heading scroll-mt-6 text-center text-xl font-bold text-brand-navy sm:text-left sm:text-2xl">{{ t('cases_heading', locale()) }}</h2>
+        <h2 id="cases" class="font-heading scroll-mt-6 text-center text-xl font-bold uppercase tracking-tight text-brand-navy sm:text-left sm:text-2xl">
+            {{ t('cases_heading', locale()) }}
+            <span class="mx-auto mt-2 block h-1 w-14 bg-brand-cyan sm:mx-0" />
+        </h2>
 
         <div v-if="cases.length === 0" class="mt-6 rounded-lg border border-dashed border-[#DCE6F0] p-10 text-center text-[#8B94A3]">
             {{ t('no_active_cases', locale()) }}
@@ -132,7 +135,10 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
         </div>
 
         <section v-if="closedCaseReports.length > 0" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
-            <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('reports_heading', locale()) }}</h2>
+            <h2 class="font-heading text-xl font-bold uppercase tracking-tight text-brand-navy sm:text-2xl">
+                {{ t('reports_heading', locale()) }}
+                <span class="mx-auto mt-2 block h-1 w-14 bg-brand-cyan sm:mx-0" />
+            </h2>
 
             <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <Link
@@ -183,45 +189,88 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
             </div>
         </section>
 
-        <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 text-center sm:grid-cols-2 sm:text-left">
-            <div v-if="pickLocale(siteSettings.aboutBody, locale())">
-                <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">
-                    {{ pickLocale(siteSettings.aboutTitle, locale()) || t('about_heading', locale()) }}
-                </h2>
-                <p class="mt-4 whitespace-pre-line text-left leading-relaxed text-[#3D4655]">
-                    {{ pickLocale(siteSettings.aboutBody, locale()) }}
-                </p>
-            </div>
+        <section v-if="siteSettings && pickLocale(siteSettings.aboutBody, locale())" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
+            <h2 class="font-heading text-xl font-bold uppercase tracking-tight text-brand-navy sm:text-2xl">
+                {{ pickLocale(siteSettings.aboutTitle, locale()) || t('about_heading', locale()) }}
+                <span class="mx-auto mt-2 block h-1 w-14 bg-brand-cyan sm:mx-0" />
+            </h2>
+            <p class="mx-auto mt-5 max-w-3xl whitespace-pre-line text-left leading-relaxed text-[#3D4655] sm:mx-0">
+                {{ pickLocale(siteSettings.aboutBody, locale()) }}
+            </p>
 
-            <div>
-                <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('contacts_heading', locale()) }}</h2>
-                <dl class="mt-4 space-y-3 text-sm text-[#3D4655]">
-                    <div v-if="pickLocale(siteSettings.contactAddress, locale())">
-                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('address', locale()) }}</dt>
-                        <dd class="mt-0.5">{{ pickLocale(siteSettings.contactAddress, locale()) }}</dd>
+            <div class="mt-8 grid gap-5 text-left sm:grid-cols-3">
+                <div v-if="pickLocale(siteSettings.aboutVolunteersBody, locale())" class="overflow-hidden rounded-[10px] border border-[#DCE6F0] bg-white">
+                    <div class="h-1 bg-brand-cyan" />
+                    <div class="p-5">
+                        <h3 class="font-heading text-sm font-bold text-[#101318]">{{ t('about_volunteers_heading', locale()) }}</h3>
+                        <p class="mt-2.5 whitespace-pre-line text-sm leading-relaxed text-[#5B6472]">{{ pickLocale(siteSettings.aboutVolunteersBody, locale()) }}</p>
                     </div>
-                    <div v-if="siteSettings.contactPhone">
-                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('phone', locale()) }}</dt>
-                        <dd class="mt-0.5">
-                            <a :href="`tel:${siteSettings.contactPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactPhone }}</a>
-                        </dd>
+                </div>
+                <div v-if="pickLocale(siteSettings.aboutBoxesBody, locale())" class="overflow-hidden rounded-[10px] border border-[#DCE6F0] bg-white">
+                    <div class="h-1 bg-brand-cyan" />
+                    <div class="p-5">
+                        <h3 class="font-heading text-sm font-bold text-[#101318]">{{ t('about_boxes_heading', locale()) }}</h3>
+                        <p class="mt-2.5 whitespace-pre-line text-sm leading-relaxed text-[#5B6472]">{{ pickLocale(siteSettings.aboutBoxesBody, locale()) }}</p>
                     </div>
-                    <div v-if="siteSettings.contactEmail">
-                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
-                        <dd class="mt-0.5">
-                            <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
-                        </dd>
+                </div>
+                <div v-if="pickLocale(siteSettings.aboutShopBody, locale())" class="overflow-hidden rounded-[10px] border border-[#DCE6F0] bg-white">
+                    <div class="h-1 bg-brand-cyan" />
+                    <div class="p-5">
+                        <h3 class="font-heading text-sm font-bold text-[#101318]">{{ t('about_shop_heading', locale()) }}</h3>
+                        <p class="mt-2.5 whitespace-pre-line text-sm leading-relaxed text-[#5B6472]">{{ pickLocale(siteSettings.aboutShopBody, locale()) }}</p>
                     </div>
-                    <div v-if="siteSettings.contactInstagram || siteSettings.contactFacebook || siteSettings.contactWhatsapp">
-                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('social_networks', locale()) }}</dt>
-                        <dd class="mt-1 flex flex-wrap justify-center gap-3 sm:justify-start">
-                            <a v-if="siteSettings.contactInstagram" :href="siteSettings.contactInstagram" target="_blank" rel="noopener" class="hover:text-brand-cyan">Instagram</a>
-                            <a v-if="siteSettings.contactFacebook" :href="siteSettings.contactFacebook" target="_blank" rel="noopener" class="hover:text-brand-cyan">Facebook</a>
-                            <a v-if="siteSettings.contactWhatsapp" :href="siteSettings.contactWhatsapp" target="_blank" rel="noopener" class="hover:text-brand-cyan">WhatsApp</a>
-                        </dd>
-                    </div>
-                </dl>
+                </div>
             </div>
+        </section>
+
+        <section v-if="siteSettings" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
+            <h2 class="font-heading text-xl font-bold uppercase tracking-tight text-brand-navy sm:text-2xl">
+                {{ t('contacts_heading', locale()) }}
+                <span class="mx-auto mt-2 block h-1 w-14 bg-brand-cyan sm:mx-0" />
+            </h2>
+
+            <dl class="mx-auto mt-6 grid max-w-3xl gap-x-10 gap-y-4 text-left text-sm text-[#3D4655] sm:mx-0 sm:grid-cols-2">
+                <div v-if="pickLocale(siteSettings.contactAddress, locale())">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('address', locale()) }}</dt>
+                    <dd class="mt-0.5">{{ pickLocale(siteSettings.contactAddress, locale()) }}</dd>
+                </div>
+                <div v-if="siteSettings.contactReceptionPhone">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('reception_phone', locale()) }}</dt>
+                    <dd class="mt-0.5">
+                        <a :href="`tel:${siteSettings.contactReceptionPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactReceptionPhone }}</a>
+                    </dd>
+                </div>
+                <div v-if="siteSettings.contactPartnershipPhone">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('partnership_phone', locale()) }}</dt>
+                    <dd class="mt-0.5">
+                        <a :href="`tel:${siteSettings.contactPartnershipPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactPartnershipPhone }}</a>
+                    </dd>
+                </div>
+                <div v-if="siteSettings.contactEmail">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
+                    <dd class="mt-0.5">
+                        <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
+                    </dd>
+                </div>
+                <div v-if="siteSettings.contactEmailSecondary">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
+                    <dd class="mt-0.5">
+                        <a :href="`mailto:${siteSettings.contactEmailSecondary}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmailSecondary }}</a>
+                    </dd>
+                </div>
+                <div v-if="siteSettings.contactWebsite">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">🌐 {{ t('website', locale()) }}</dt>
+                    <dd class="mt-0.5">
+                        <a :href="siteSettings.contactWebsite" target="_blank" rel="noopener" class="hover:text-brand-cyan">{{ siteSettings.contactWebsite }}</a>
+                    </dd>
+                </div>
+                <div v-if="siteSettings.contactInstagram">
+                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">📱 Instagram</dt>
+                    <dd class="mt-0.5">
+                        <a :href="siteSettings.contactInstagram" target="_blank" rel="noopener" class="hover:text-brand-cyan">{{ siteSettings.contactInstagram }}</a>
+                    </dd>
+                </div>
+            </dl>
         </section>
     </PublicLayout>
 </template>

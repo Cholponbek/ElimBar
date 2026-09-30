@@ -21,21 +21,52 @@ const supportMenuOpen = ref(false);
 
 <template>
     <div class="min-h-screen bg-[#F5F8FC] text-stone-900">
-        <header class="border-b-[3px] border-brand-cyan bg-brand-navy">
+        <header class="sticky top-0 z-50 border-b border-[#DCE6F0] bg-white shadow-[0_1px_0_rgba(2,1,163,0.03)]">
             <!-- На мобильном — 3 равные колонки (лого по центру, независимо
                  от разной ширины "Нужна помощь?" слева и переключателя
                  языка справа), на sm: и выше — обычный flex с лого слева
                  и всем остальным одной группой справа, как было. -->
             <div class="mx-auto grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3.5 sm:flex sm:max-w-6xl sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
-                <Link href="/help" class="text-sm font-medium text-white hover:text-brand-cyan sm:hidden">
+                <Link href="/help" class="text-sm font-medium text-brand-navy hover:text-brand-cyan sm:hidden">
                     {{ t('nav_help', locale()) }}
                 </Link>
 
                 <Link href="/" class="justify-self-center sm:order-first sm:justify-self-auto">
-                    <img src="/images/elimbar-logo-white.png" alt="Элим, барсыңбы?!" class="h-9 w-auto" />
+                    <img src="/images/elimbar-logo-blue.png" alt="Элим, барсыңбы?!" class="h-9 w-auto" />
                 </Link>
 
                 <div class="flex items-center justify-end gap-4 sm:justify-normal">
+                    <Link href="/help" class="hidden text-sm font-medium text-brand-navy hover:text-brand-cyan sm:inline">
+                        {{ t('nav_help', locale()) }}
+                    </Link>
+                    <span class="hidden text-sm text-[#5B6472] sm:inline">{{ t('org_line', locale()) }}</span>
+                    <div class="flex items-center gap-1 rounded-full bg-[#F5F8FC] p-0.5 text-xs font-bold">
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'ky' ? 'bg-brand-navy text-white' : 'text-[#5B6472] hover:text-brand-navy'"
+                            @click="switchLocale('ky')"
+                        >
+                            KY
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'ru' ? 'bg-brand-navy text-white' : 'text-[#5B6472] hover:text-brand-navy'"
+                            @click="switchLocale('ru')"
+                        >
+                            RU
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'en' ? 'bg-brand-navy text-white' : 'text-[#5B6472] hover:text-brand-navy'"
+                            @click="switchLocale('en')"
+                        >
+                            EN
+                        </button>
+                    </div>
+
                     <!-- Только от sm: и выше — на мобильном кнопка вплотную
                          к лого смотрится тесно, а выпадающее меню под ней
                          на узком экране не даёт выигрыша (кейсы и так
@@ -43,7 +74,7 @@ const supportMenuOpen = ref(false);
                     <div class="relative hidden sm:block">
                         <button
                             type="button"
-                            class="font-heading flex items-center gap-1 rounded-lg bg-brand-cyan px-3 py-1.5 text-sm font-bold text-brand-navy transition hover:bg-white"
+                            class="font-heading flex items-center gap-1 rounded-lg bg-brand-cyan px-3.5 py-2 text-sm font-bold text-white transition hover:bg-brand-navy"
                             :aria-expanded="supportMenuOpen"
                             @click="supportMenuOpen = !supportMenuOpen"
                         >
@@ -97,38 +128,9 @@ const supportMenuOpen = ref(false);
                             </div>
                         </template>
                     </div>
-                    <Link href="/help" class="hidden text-sm font-medium text-white hover:text-brand-cyan sm:inline">
-                        {{ t('nav_help', locale()) }}
-                    </Link>
-                    <span class="hidden text-sm text-white/70 sm:inline">{{ t('org_line', locale()) }}</span>
-                    <div class="flex items-center gap-1 rounded-full bg-white/10 p-0.5 text-xs font-bold">
-                        <button
-                            type="button"
-                            class="rounded-full px-2 py-1 transition"
-                            :class="locale() === 'ky' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
-                            @click="switchLocale('ky')"
-                        >
-                            KY
-                        </button>
-                        <button
-                            type="button"
-                            class="rounded-full px-2 py-1 transition"
-                            :class="locale() === 'ru' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
-                            @click="switchLocale('ru')"
-                        >
-                            RU
-                        </button>
-                        <button
-                            type="button"
-                            class="rounded-full px-2 py-1 transition"
-                            :class="locale() === 'en' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
-                            @click="switchLocale('en')"
-                        >
-                            EN
-                        </button>
-                    </div>
                 </div>
             </div>
+            <div class="h-[3px] bg-brand-cyan" />
         </header>
 
         <slot name="hero" />

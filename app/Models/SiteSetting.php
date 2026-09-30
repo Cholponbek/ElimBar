@@ -17,14 +17,20 @@ class SiteSetting extends Model
     use BelongsToTenant;
 
     protected $fillable = [
-        'about_title', 'about_body', 'contact_address',
-        'contact_phone', 'contact_email',
-        'contact_instagram', 'contact_facebook', 'contact_whatsapp',
+        'about_title', 'about_body',
+        'about_volunteers_body', 'about_boxes_body', 'about_shop_body',
+        'contact_address',
+        'contact_reception_phone', 'contact_partnership_phone',
+        'contact_email', 'contact_email_secondary',
+        'contact_website', 'contact_instagram',
     ];
 
     protected $casts = [
         'about_title' => 'array',
         'about_body' => 'array',
+        'about_volunteers_body' => 'array',
+        'about_boxes_body' => 'array',
+        'about_shop_body' => 'array',
         'contact_address' => 'array',
     ];
 

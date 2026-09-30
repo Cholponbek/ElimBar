@@ -82,12 +82,16 @@ class CaseController extends Controller
             'siteSettings' => $siteSettings ? [
                 'aboutTitle' => $siteSettings->about_title,
                 'aboutBody' => $siteSettings->about_body,
+                'aboutVolunteersBody' => $siteSettings->about_volunteers_body,
+                'aboutBoxesBody' => $siteSettings->about_boxes_body,
+                'aboutShopBody' => $siteSettings->about_shop_body,
                 'contactAddress' => $siteSettings->contact_address,
-                'contactPhone' => $siteSettings->contact_phone,
+                'contactReceptionPhone' => $siteSettings->contact_reception_phone,
+                'contactPartnershipPhone' => $siteSettings->contact_partnership_phone,
                 'contactEmail' => $siteSettings->contact_email,
+                'contactEmailSecondary' => $siteSettings->contact_email_secondary,
+                'contactWebsite' => $siteSettings->contact_website,
                 'contactInstagram' => $siteSettings->contact_instagram,
-                'contactFacebook' => $siteSettings->contact_facebook,
-                'contactWhatsapp' => $siteSettings->contact_whatsapp,
             ] : null,
         ]);
     }
