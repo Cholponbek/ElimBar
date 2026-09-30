@@ -21,7 +21,7 @@ class SiteSetting extends Model
         'about_volunteers_body', 'about_boxes_body', 'about_shop_body',
         'contact_address',
         'contact_reception_phone', 'contact_partnership_phone',
-        'contact_email', 'contact_email_secondary',
+        'contact_email', 'contact_working_hours',
         'contact_website', 'contact_instagram',
     ];
 

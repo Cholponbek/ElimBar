@@ -134,9 +134,8 @@ class SiteSettingsPage extends Page implements HasForms
                             ->label('Электронная почта')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('contact_email_secondary')
-                            ->label('Электронная почта (доп.)')
-                            ->email()
+                        Forms\Components\TextInput::make('contact_working_hours')
+                            ->label('График работы')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('contact_website')
                             ->label('Официальный сайт')
