@@ -63,7 +63,7 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         </div>
                         <div>
                             <dt class="text-xs text-white/60">{{ t('stat_raised', locale()) }}</dt>
-                            <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ formatSom(stats.raisedMinor) }}</dd>
+                            <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ formatSom(stats.raisedMinor, locale()) }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs text-white/60">{{ t('stat_donations', locale()) }}</dt>
@@ -118,8 +118,8 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                     </div>
                     <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
-                        <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
-                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
+                        <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
                     </div>
                 </div>
             </Link>
@@ -163,8 +163,8 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                             <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                         </div>
                         <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
-                            <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
-                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
+                            <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
                         </div>
                     </div>
                 </Link>
