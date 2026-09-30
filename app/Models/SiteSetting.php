@@ -32,6 +32,7 @@ class SiteSetting extends Model
         'about_boxes_body' => 'array',
         'about_shop_body' => 'array',
         'contact_address' => 'array',
+        'contact_working_hours' => 'array',
     ];
 
     public static function current(): self

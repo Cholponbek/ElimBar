@@ -134,8 +134,14 @@ class SiteSettingsPage extends Page implements HasForms
                             ->label('Электронная почта')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('contact_working_hours')
-                            ->label('График работы')
+                        Forms\Components\TextInput::make('contact_working_hours.ky')
+                            ->label('График работы (кыргызча)')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('contact_working_hours.ru')
+                            ->label('График работы (русский)')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('contact_working_hours.en')
+                            ->label('Working hours (English)')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('contact_website')
                             ->label('Официальный сайт')
