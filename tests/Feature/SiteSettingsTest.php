@@ -19,7 +19,7 @@ it('lets app_public read site_settings but never write to it', function () {
 
     expect(fn () => DB::connection('pgsql_public')->table('site_settings')
         ->where('id', $row->id)
-        ->update(['contact_phone' => '+996 000 000 000'])
+        ->update(['contact_reception_phone' => '+996 000 000 000'])
     )->toThrow(QueryException::class, 'permission denied for table site_settings');
 });
 
@@ -30,14 +30,14 @@ it('exposes the localized about/contact content to the homepage', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('Cases/Index')
         ->has('siteSettings.aboutTitle.ru')
-        ->has('siteSettings.contactPhone')
+        ->has('siteSettings.contactReceptionPhone')
     );
 });
 
 it('lets the Filament admin update the singleton row', function () {
     $setting = SiteSetting::current();
 
-    $setting->update(['contact_phone' => '+996 555 111 222']);
+    $setting->update(['contact_reception_phone' => '+996 555 111 222']);
 
-    expect($setting->fresh()->contact_phone)->toBe('+996 555 111 222');
+    expect($setting->fresh()->contact_reception_phone)->toBe('+996 555 111 222');
 });
