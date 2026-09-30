@@ -6,6 +6,7 @@ import { categoryLabel as categoryLabelFor, donationsWord, t } from '../../i18n.
 
 const props = defineProps({
     cases: { type: Array, required: true },
+    closedCaseReports: { type: Array, default: () => [] },
     stats: { type: Object, required: true },
     siteSettings: { type: Object, default: null },
 });
@@ -62,7 +63,7 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         </div>
                         <div>
                             <dt class="text-xs text-white/60">{{ t('stat_raised', locale()) }}</dt>
-                            <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ formatSom(stats.raisedMinor) }}</dd>
+                            <dd class="font-heading mt-1 text-xl font-extrabold text-white sm:text-2xl">{{ formatSom(stats.raisedMinor, locale()) }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs text-white/60">{{ t('stat_donations', locale()) }}</dt>
@@ -117,12 +118,58 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                         <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
                     </div>
                     <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
-                        <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor) }}</b></span>
-                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor) }}</b></span>
+                        <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                        <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
                     </div>
                 </div>
             </Link>
         </div>
+
+        <section v-if="closedCaseReports.length > 0" class="mt-16 border-t border-[#DCE6F0] pt-10 text-center sm:text-left">
+            <h2 class="font-heading text-xl font-bold text-brand-navy sm:text-2xl">{{ t('reports_heading', locale()) }}</h2>
+
+            <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <Link
+                    v-for="c in closedCaseReports"
+                    :key="c.id"
+                    :href="`/cases/${c.id}/report`"
+                    class="block overflow-hidden rounded-[10px] border border-[#DCE6F0] bg-white transition hover:border-brand-cyan hover:shadow-[0_4px_16px_rgba(2,1,163,0.08)]"
+                >
+                    <div class="relative">
+                        <div class="h-1 bg-brand-cyan" />
+                        <img
+                            v-if="c.photoUrl"
+                            :src="c.photoUrl"
+                            :alt="pickLocale(c.title, locale())"
+                            class="aspect-video w-full object-cover"
+                        />
+                        <div v-else class="aspect-video w-full bg-gradient-to-br from-brand-blue to-brand-navy" />
+                        <span class="font-heading absolute bottom-2 right-2 rounded-full bg-brand-navy/85 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
+                            {{ t('status_closed', locale()) }}
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-2.5 p-4">
+                        <div class="font-heading text-[11px] font-bold uppercase tracking-wider text-brand-cyan">
+                            {{ categoryLabel(c.category) }}
+                        </div>
+                        <h3 class="font-heading text-[15.5px] font-bold leading-snug text-[#101318]">
+                            {{ pickLocale(c.title, locale()) }}
+                        </h3>
+
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-[#E4ECF5]">
+                                <div class="h-full bg-brand-navy" :style="{ width: progress(c) + '%' }" />
+                            </div>
+                            <span class="font-heading text-[13px] font-bold text-brand-navy">{{ progress(c) }}%</span>
+                        </div>
+                        <div class="flex justify-between border-t border-[#EEF3F8] pt-2 text-[12.5px] text-[#5B6472]">
+                            <span>{{ t('collected', locale()) }} <b class="text-[#101318]">{{ formatSom(c.allocated_minor, locale()) }}</b></span>
+                            <span>{{ t('goal', locale()) }} <b class="text-[#101318]">{{ formatSom(c.budget_minor, locale()) }}</b></span>
+                        </div>
+                    </div>
+                </Link>
+            </div>
+        </section>
 
         <section v-if="siteSettings" class="mt-16 grid gap-8 border-t border-[#DCE6F0] pt-10 text-center sm:grid-cols-2 sm:text-left">
             <div v-if="pickLocale(siteSettings.aboutBody, locale())">

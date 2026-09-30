@@ -189,13 +189,13 @@ function submit() {
                             </span>
                         </div>
                         <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
-                            <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</b></span>
-                            <span class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor) }}</span>
+                            <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</b></span>
+                            <span class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
                         </div>
                     </div>
 
                     <div class="mt-3 text-sm text-[#8B94A3]">
-                        {{ t('disbursed_for_case', locale()) }} {{ formatSom(props.case.disbursed_minor) }}
+                        {{ t('disbursed_for_case', locale()) }} {{ formatSom(props.case.disbursed_minor, locale()) }}
                     </div>
 
                     <div v-if="flashSuccess()" class="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -310,7 +310,7 @@ function submit() {
                                 <span class="text-[#8B94A3]">{{ formatDate(donation.created_at) }}</span>
                                 <span v-if="donation.donorDisplay" class="text-xs text-[#8B94A3]">{{ donation.donorDisplay }}</span>
                             </span>
-                            <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor) }}</span>
+                            <span class="font-heading font-bold text-[#101318]">{{ formatSom(donation.amount_minor, locale()) }}</span>
                         </li>
                     </ul>
 
@@ -357,8 +357,8 @@ function submit() {
         >
             <div class="flex items-center gap-2">
                 <div class="flex flex-1 flex-col text-sm text-[#5B6472]">
-                    <span class="font-heading font-bold text-[#101318]">{{ formatSom(props.case.allocated_minor) }}</span>
-                    <span class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor) }}</span>
+                    <span class="font-heading font-bold text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</span>
+                    <span class="text-xs">{{ progressPercent() }}% · {{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
                 </div>
                 <button
                     type="button"

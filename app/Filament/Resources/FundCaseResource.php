@@ -74,7 +74,7 @@ class FundCaseResource extends Resource
 
                 Forms\Components\Section::make('Публичная карточка')
                     ->description('Видно донорам на витрине — без ФИО и других данных бенефициара.')
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\TextInput::make('public_title.ky')
                             ->label('Заголовок (кыргызча)')
@@ -84,11 +84,17 @@ class FundCaseResource extends Resource
                             ->label('Заголовок (русский)')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\TextInput::make('public_title.en')
+                            ->label('Title (English)')
+                            ->maxLength(255),
                         Forms\Components\Textarea::make('public_story.ky')
                             ->label('История (кыргызча)')
                             ->rows(4),
                         Forms\Components\Textarea::make('public_story.ru')
                             ->label('История (русский)')
+                            ->rows(4),
+                        Forms\Components\Textarea::make('public_story.en')
+                            ->label('Story (English)')
                             ->rows(4),
                         Forms\Components\FileUpload::make('public_photo_paths')
                             ->label('Фото (карусель)')
@@ -162,6 +168,27 @@ class FundCaseResource extends Resource
                             ->label('Принимает закят')
                             ->helperText('Религиозное ограничение — закят нельзя аллоцировать на кейс без этой отметки.'),
                     ]),
+
+                Forms\Components\Section::make('Сроки кейса')
+                    ->columns(3)
+                    ->schema([
+                        Forms\Components\Placeholder::make('start_date_display')
+                            ->label('Дата начала')
+                            ->content(fn (?FundCase $record) => $record?->exists ? $record->created_at->translatedFormat('d.m.Y') : 'Будет проставлена автоматически при создании кейса')
+                            ->helperText('Не редактируется — всегда дата создания кейса.'),
+                        Forms\Components\Toggle::make('is_indefinite')
+                            ->label('Бессрочный')
+                            ->live()
+                            ->dehydrated(false)
+                            ->afterStateHydrated(fn (Forms\Components\Toggle $component, ?FundCase $record) => $component->state($record?->end_date === null && $record?->exists)),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('Дата окончания')
+                            ->helperText('Оставьте пустым или включите «Бессрочный», если дата окончания ещё не определена.')
+                            ->visible(fn (Forms\Get $get) => ! $get('is_indefinite'))
+                            ->dehydratedWhenHidden()
+                            ->dehydrateStateUsing(fn (Forms\Get $get, $state) => $get('is_indefinite') ? null : $state)
+                            ->afterOrEqual(fn (?FundCase $record) => ($record?->created_at ?? now())->toDateString()),
+                    ]),
             ]);
     }
 
@@ -209,6 +236,11 @@ class FundCaseResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('close')
+                    ->label('Закрыть')
+                    ->icon('heroicon-o-archive-box')
+                    ->color('gray')
+                    ->url(fn (FundCase $record) => CaseClosureResource::getUrl('edit', ['record' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

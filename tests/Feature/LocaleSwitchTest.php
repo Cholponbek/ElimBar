@@ -16,8 +16,15 @@ it('sets the locale cookie on POST /locale', function () {
     $response->assertCookie('elimbar_locale', 'ru');
 });
 
-it('rejects an unsupported locale', function () {
+it('sets the locale cookie for the English locale too', function () {
     $response = $this->post('/locale', ['locale' => 'en']);
+
+    $response->assertRedirect();
+    $response->assertCookie('elimbar_locale', 'en');
+});
+
+it('rejects an unsupported locale', function () {
+    $response = $this->post('/locale', ['locale' => 'fr']);
 
     $response->assertSessionHasErrors('locale');
 });
@@ -35,6 +42,6 @@ it('ignores a garbage cookie value and falls back to the app default', function 
     expect(app()->getLocale())->toBe(config('app.locale'));
 });
 
-it('only recognizes ru and ky as supported locales', function () {
-    expect(SetLocaleFromCookie::SUPPORTED)->toBe(['ru', 'ky']);
+it('only recognizes ru, ky and en as supported locales', function () {
+    expect(SetLocaleFromCookie::SUPPORTED)->toBe(['ru', 'ky', 'en']);
 });

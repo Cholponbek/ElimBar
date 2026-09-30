@@ -118,6 +118,14 @@ const supportMenuOpen = ref(false);
                         >
                             RU
                         </button>
+                        <button
+                            type="button"
+                            class="rounded-full px-2 py-1 transition"
+                            :class="locale() === 'en' ? 'bg-brand-cyan text-brand-navy' : 'text-white/70 hover:text-white'"
+                            @click="switchLocale('en')"
+                        >
+                            EN
+                        </button>
                     </div>
                 </div>
             </div>

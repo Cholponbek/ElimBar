@@ -80,6 +80,20 @@ const translations = {
         email: 'Email',
         social_networks: 'Соцсети',
 
+        reports_heading: 'Мероприятия и отчёты',
+        report_closed_on: 'Закрыт',
+        report_case_heading: 'Кейс',
+        report_short_description: 'Краткое описание',
+        report_needed: 'Нужно было собрать',
+        report_period_heading: 'Сроки кейса',
+        report_start_date: 'Дата начала',
+        report_end_date: 'Дата окончания',
+        report_open_ended: 'Открыт',
+        report_status: 'Статус',
+        status_closed: 'Закрыт',
+        report_activities_heading: 'Отчёт по кейсу',
+        report_photos_heading: 'Фото отчёта',
+
         story_collected_suffix: 'собрано',
         story_goal_prefix: 'Цель —',
     },
@@ -157,8 +171,113 @@ const translations = {
         email: 'Email',
         social_networks: 'Социалдык тармактар',
 
+        reports_heading: 'Иш-чаралар жана отчёттор',
+        report_closed_on: 'Жабылды',
+        report_case_heading: 'Кейс',
+        report_short_description: 'Кыскача маалымат',
+        report_needed: 'Канча сумма керек болгон',
+        report_period_heading: 'Кейстин мөөнөтү',
+        report_start_date: 'Башталган күнү',
+        report_end_date: 'Аяктаган күнү',
+        report_open_ended: 'Ачык',
+        report_status: 'Статус',
+        status_closed: 'Жабылды',
+        report_activities_heading: 'Кейс боюнча отчёт',
+        report_photos_heading: 'Отчёттун сүрөттөрү',
+
         story_collected_suffix: 'жыйналды',
         story_goal_prefix: 'Максат —',
+    },
+    en: {
+        nav_help: 'Need help?',
+        org_line: 'Public Charity Fund · Bishkek, KG',
+        support_menu_title: 'Choose a case to support',
+        view_all_cases: 'View all cases',
+        footer_tagline: 'Every som is tied to a specific case — the public report is generated automatically.',
+
+        hero_badge: 'Public Charity Fund',
+        hero_subtitle: 'Every som is tied to a specific case — the public report is generated automatically.',
+        hero_cta_view_cases: 'View cases',
+        stat_active_cases: 'Active cases',
+        stat_raised: 'Raised publicly',
+        stat_donations: 'Donations',
+
+        cases_heading: 'Cases that need help',
+        no_active_cases: 'No active cases yet.',
+        collected: 'Raised',
+        goal: 'Goal',
+
+        category_medical: 'Medical treatment',
+        category_winter_food: 'Winter food aid',
+        category_fund_project: 'Fund project',
+
+        back_to_cases: 'All cases',
+        share: 'Share',
+        preparing_card: 'Preparing card…',
+        download_story_card: 'Download Stories card',
+        preparing: 'Preparing…',
+        copy_link: 'Copy link',
+        link_copied: 'Link copied',
+        close: 'Close',
+        share_modal_title: 'Share',
+        share_your_link: 'Your link',
+        share_description: 'Send the link to friends — every donation is instantly visible in the public report.',
+        share_email: 'Email',
+        share_instagram_stories: 'Instagram Stories',
+        share_other_ways: 'Other ways',
+        previous_photo: 'Previous photo',
+        next_photo: 'Next photo',
+        photo: 'Photo',
+        no_details_yet: 'No details yet.',
+        disbursed_for_case: 'Disbursed for this case:',
+        amount_som: 'Amount, KGS',
+        custom_amount_placeholder: 'Or your own amount',
+        phone: 'Phone',
+        phone_placeholder: '+996 700 000 000',
+        name_optional: 'Name (optional)',
+        name_placeholder: 'How should we address you',
+        show_name_publicly: 'Show my name in the donations list instead of my phone number',
+        support: 'Support',
+        sending: 'Sending…',
+        recent_donations: 'Recent donations',
+        see_all_donations: 'See all',
+        see_top_donations: 'See top',
+        donations_modal_title: 'Donations',
+        donations_tab_all: 'All',
+        donations_tab_top: 'Top',
+        loading: 'Loading…',
+        no_donations_yet: 'No donations yet.',
+
+        help_title: 'Need help?',
+        help_subtitle: 'Tell us about the situation — a fund staff member will contact you, and if everything is confirmed, the case will appear on the site.',
+        full_name: 'Your full name',
+        category: 'Category',
+        describe_situation: 'Describe the situation',
+        requested_amount: 'Amount needed, KGS (if known)',
+        submit_request: 'Submit request',
+
+        about_heading: 'About us',
+        contacts_heading: 'Contacts',
+        address: 'Address',
+        email: 'Email',
+        social_networks: 'Social media',
+
+        reports_heading: 'Activities and reports',
+        report_closed_on: 'Closed',
+        report_case_heading: 'Case',
+        report_short_description: 'Short description',
+        report_needed: 'Amount needed',
+        report_period_heading: 'Case timeline',
+        report_start_date: 'Start date',
+        report_end_date: 'End date',
+        report_open_ended: 'Open-ended',
+        report_status: 'Status',
+        status_closed: 'Closed',
+        report_activities_heading: 'Case report',
+        report_photos_heading: 'Report photos',
+
+        story_collected_suffix: 'raised',
+        story_goal_prefix: 'Goal —',
     },
 };
 
@@ -181,8 +300,13 @@ export function categoryLabel(category, locale) {
 
 // Кыргызский, как и другие тюркские языки, не склоняет существительное
 // после числительного ("3 донат", не "3 доната") — русское склонение
-// (донат/доната/донатов) нужно только для ru.
+// (донат/доната/донатов) нужно только для ru. Английский — обычное
+// singular/plural (1 donation / 2 donations).
 export function donationsWord(n, locale) {
+    if (locale === 'en') {
+        return n === 1 ? 'donation' : 'donations';
+    }
+
     if (locale !== 'ru') {
         return 'донат';
     }
