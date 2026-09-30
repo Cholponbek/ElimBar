@@ -43,6 +43,14 @@ const progressPercent = () =>
         ? Math.min(100, Math.round((props.case.allocated_minor / props.case.budget_minor) * 100))
         : 0;
 
+// Тематические иконки (дом/монета) должны реагировать и на кейсы без
+// ограничения бюджета — там "% от цели" не определён (progressPercent()
+// всегда 0). Вместо этого используем число донатов: каждый донат двигает
+// иконку к "тёплому"/"счастливому" состоянию, после 10 донатов — максимум.
+// Для кейсов с бюджетом используем обычный % от цели, как раньше.
+const progressForTheme = () =>
+    props.case.budget_minor !== null ? progressPercent() : Math.min(100, props.donationsCount * 10);
+
 // Кольцо прогресса (GoFundMe-паттерн) — окружность длиной 2πr, показываем
 // нужную долю через stroke-dasharray/offset, остальное решает CSS-transition.
 const RING_RADIUS = 42;
@@ -175,25 +183,27 @@ function submit() {
                      "Поддержать" уже давно прокручена мимо экрана. -->
                 <div ref="donateCardEl" class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
-                        <template v-if="props.case.budget_minor !== null">
-                            <WarmthHouseProgress v-if="props.case.progressTheme === 'warmth_house'" :progress="progressPercent()" />
-                            <HappyCoinProgress v-else-if="props.case.progressTheme === 'happy_coin'" :progress="progressPercent()" />
-                            <div v-else class="relative h-20 w-20 flex-shrink-0">
-                                <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
-                                    <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
-                                    <circle
-                                        cx="48" cy="48" r="42" fill="none" stroke="#0201a3" stroke-width="8"
-                                        stroke-linecap="round"
-                                        :stroke-dasharray="2 * Math.PI * 42"
-                                        :stroke-dashoffset="ringOffset()"
-                                        class="transition-[stroke-dashoffset] duration-500"
-                                    />
-                                </svg>
-                                <span class="font-heading absolute inset-0 flex items-center justify-center text-base font-extrabold text-brand-navy">
-                                    {{ progressPercent() }}%
-                                </span>
-                            </div>
-                        </template>
+                        <!-- Тематические иконки (дом/монета) показываются всегда,
+                             даже без ограничения бюджета (см. progressForTheme()) —
+                             обычное кольцо остаётся только для кейсов с целью, у
+                             него "%" без бюджета не имеет смысла. -->
+                        <WarmthHouseProgress v-if="props.case.progressTheme === 'warmth_house'" :progress="progressForTheme()" />
+                        <HappyCoinProgress v-else-if="props.case.progressTheme === 'happy_coin'" :progress="progressForTheme()" />
+                        <div v-else-if="props.case.budget_minor !== null" class="relative h-20 w-20 flex-shrink-0">
+                            <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
+                                <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
+                                <circle
+                                    cx="48" cy="48" r="42" fill="none" stroke="#0201a3" stroke-width="8"
+                                    stroke-linecap="round"
+                                    :stroke-dasharray="2 * Math.PI * 42"
+                                    :stroke-dashoffset="ringOffset()"
+                                    class="transition-[stroke-dashoffset] duration-500"
+                                />
+                            </svg>
+                            <span class="font-heading absolute inset-0 flex items-center justify-center text-base font-extrabold text-brand-navy">
+                                {{ progressPercent() }}%
+                            </span>
+                        </div>
                         <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
                             <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</b></span>
                             <span v-if="props.case.budget_minor !== null" class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>
