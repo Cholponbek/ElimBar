@@ -62,7 +62,7 @@ class CaseClosureResource extends Resource
                             ->content(fn (?FundCase $record) => Str::limit(strip_tags($record?->public_story['ru'] ?? $record?->public_story['ky'] ?? ''), 200, '…') ?: '—'),
                         Forms\Components\Placeholder::make('budget_display')
                             ->label('Нужно было собрать')
-                            ->content(fn (?FundCase $record) => number_format(($record?->budget_minor ?? 0) / 100, 0, '.', ' ').' сом'),
+                            ->content(fn (?FundCase $record) => $record?->budget_minor === null ? 'Не ограничен' : number_format($record->budget_minor / 100, 0, '.', ' ').' сом'),
                         Forms\Components\Placeholder::make('collected_display')
                             ->label('Собрано')
                             ->content(fn (?FundCase $record) => number_format(($record?->allocated_minor ?? 0) / 100, 0, '.', ' ').' сом'),
@@ -182,6 +182,10 @@ class CaseClosureResource extends Resource
                             ->placeholder('—'),
                         Infolists\Components\TextEntry::make('budget_minor')
                             ->label('Нужно было собрать')
+                            // ->placeholder(), не null-ветка в formatStateUsing() — см.
+                            // тот же комментарий в FundCaseResource: Arr::wrap(null) === [],
+                            // formatStateUsing для null не вызывается вовсе.
+                            ->placeholder('Не ограничен')
                             ->formatStateUsing(fn (int $state) => number_format($state / 100, 0, '.', ' ').' сом'),
                         Infolists\Components\TextEntry::make('allocated_minor')
                             ->label('Собрано')
