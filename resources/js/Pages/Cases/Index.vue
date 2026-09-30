@@ -229,44 +229,99 @@ const progress = (c) => (c.budget_minor > 0 ? Math.min(100, Math.round((c.alloca
                 <span class="mx-auto mt-2 block h-1 w-14 bg-brand-cyan sm:mx-0" />
             </h2>
 
-            <dl class="mx-auto mt-6 grid max-w-3xl gap-x-10 gap-y-4 text-left text-sm text-[#3D4655] sm:mx-0 sm:grid-cols-2">
-                <div v-if="pickLocale(siteSettings.contactAddress, locale())">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('address', locale()) }}</dt>
-                    <dd class="mt-0.5">{{ pickLocale(siteSettings.contactAddress, locale()) }}</dd>
+            <dl class="mx-auto mt-6 grid max-w-3xl gap-x-10 gap-y-5 text-left text-sm text-[#3D4655] sm:mx-0 sm:grid-cols-2">
+                <div v-if="pickLocale(siteSettings.contactAddress, locale())" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('address', locale()) }}</dt>
+                        <dd class="mt-0.5">{{ pickLocale(siteSettings.contactAddress, locale()) }}</dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactReceptionPhone">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('reception_phone', locale()) }}</dt>
-                    <dd class="mt-0.5">
-                        <a :href="`tel:${siteSettings.contactReceptionPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactReceptionPhone }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactReceptionPhone" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293c-2.884-1.353-5.207-3.676-6.56-6.56l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('reception_phone', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="`tel:${siteSettings.contactReceptionPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactReceptionPhone }}</a>
+                        </dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactPartnershipPhone">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('partnership_phone', locale()) }}</dt>
-                    <dd class="mt-0.5">
-                        <a :href="`tel:${siteSettings.contactPartnershipPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactPartnershipPhone }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactPartnershipPhone" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293c-2.884-1.353-5.207-3.676-6.56-6.56l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('partnership_phone', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="`tel:${siteSettings.contactPartnershipPhone}`" class="hover:text-brand-cyan">{{ siteSettings.contactPartnershipPhone }}</a>
+                        </dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactEmail">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
-                    <dd class="mt-0.5">
-                        <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactEmail" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('email', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="`mailto:${siteSettings.contactEmail}`" class="hover:text-brand-cyan">{{ siteSettings.contactEmail }}</a>
+                        </dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactWorkingHours">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('working_hours', locale()) }}</dt>
-                    <dd class="mt-0.5">{{ siteSettings.contactWorkingHours }}</dd>
+                <div v-if="pickLocale(siteSettings.contactWorkingHours, locale())" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M12 6v6l4 2" />
+                            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('working_hours', locale()) }}</dt>
+                        <dd class="mt-0.5">{{ pickLocale(siteSettings.contactWorkingHours, locale()) }}</dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactWebsite">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">🌐 {{ t('website', locale()) }}</dt>
-                    <dd class="mt-0.5">
-                        <a :href="siteSettings.contactWebsite" target="_blank" rel="noopener" class="hover:text-brand-cyan">{{ siteSettings.contactWebsite }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactWebsite" class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path d="M3.6 9h16.8M3.6 15h16.8" />
+                            <path d="M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18" />
+                        </svg>
+                    </span>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">{{ t('website', locale()) }}</dt>
+                        <dd class="mt-0.5">
+                            <a :href="siteSettings.contactWebsite" target="_blank" rel="noopener" class="hover:text-brand-cyan">{{ siteSettings.contactWebsite }}</a>
+                        </dd>
+                    </div>
                 </div>
-                <div v-if="siteSettings.contactInstagram">
-                    <dt class="text-xs uppercase tracking-wider text-[#8B94A3]">📱 Instagram</dt>
-                    <dd class="mt-0.5">
-                        <a :href="siteSettings.contactInstagram" target="_blank" rel="noopener" class="hover:text-brand-cyan">{{ siteSettings.contactInstagram }}</a>
-                    </dd>
+                <div v-if="siteSettings.contactInstagram" class="flex items-center">
+                    <a
+                        :href="siteSettings.contactInstagram"
+                        target="_blank"
+                        rel="noopener"
+                        aria-label="Instagram"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F8FC] text-brand-cyan transition hover:bg-brand-cyan hover:text-white"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5">
+                            <rect x="3" y="3" width="18" height="18" rx="5" />
+                            <circle cx="12" cy="12" r="4" />
+                            <circle cx="17.25" cy="6.75" r="0.5" fill="currentColor" stroke="none" />
+                        </svg>
+                    </a>
                 </div>
             </dl>
         </section>
