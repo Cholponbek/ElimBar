@@ -29,7 +29,7 @@ class FundCase extends Model
         'request_id', 'campaign_id', 'beneficiary_id', 'category', 'status',
         'public_title', 'public_story', 'public_photo_id', 'public_photo_path',
         'public_photo_paths', 'currency', 'budget_minor', 'allows_zakat', 'closed_at',
-        'end_date', 'financial_documents_paths',
+        'end_date', 'financial_documents_paths', 'progress_theme',
         'closure_report_description', 'closure_report_photo_paths',
     ];
 

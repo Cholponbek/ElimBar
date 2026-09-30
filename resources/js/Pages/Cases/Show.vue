@@ -4,6 +4,8 @@ import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '../../Layouts/PublicLayout.vue';
 import ShareModal from '../../Components/ShareModal.vue';
 import DonationsModal from '../../Components/DonationsModal.vue';
+import WarmthHouseProgress from '../../Components/Progress/WarmthHouseProgress.vue';
+import HappyCoinProgress from '../../Components/Progress/HappyCoinProgress.vue';
 import { formatSom, pickLocale } from '../../money.js';
 import { categoryLabel as categoryLabelFor, t } from '../../i18n.js';
 
@@ -173,21 +175,25 @@ function submit() {
                      "Поддержать" уже давно прокручена мимо экрана. -->
                 <div ref="donateCardEl" class="rounded-[10px] border border-[#DCE6F0] bg-white p-4 sm:p-5">
                     <div class="flex items-center gap-4">
-                        <div v-if="props.case.budget_minor !== null" class="relative h-20 w-20 flex-shrink-0">
-                            <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
-                                <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
-                                <circle
-                                    cx="48" cy="48" r="42" fill="none" stroke="#0201a3" stroke-width="8"
-                                    stroke-linecap="round"
-                                    :stroke-dasharray="2 * Math.PI * 42"
-                                    :stroke-dashoffset="ringOffset()"
-                                    class="transition-[stroke-dashoffset] duration-500"
-                                />
-                            </svg>
-                            <span class="font-heading absolute inset-0 flex items-center justify-center text-base font-extrabold text-brand-navy">
-                                {{ progressPercent() }}%
-                            </span>
-                        </div>
+                        <template v-if="props.case.budget_minor !== null">
+                            <WarmthHouseProgress v-if="props.case.progressTheme === 'warmth_house'" :progress="progressPercent()" />
+                            <HappyCoinProgress v-else-if="props.case.progressTheme === 'happy_coin'" :progress="progressPercent()" />
+                            <div v-else class="relative h-20 w-20 flex-shrink-0">
+                                <svg viewBox="0 0 96 96" class="h-20 w-20 -rotate-90">
+                                    <circle cx="48" cy="48" r="42" fill="none" stroke="#E4ECF5" stroke-width="8" />
+                                    <circle
+                                        cx="48" cy="48" r="42" fill="none" stroke="#0201a3" stroke-width="8"
+                                        stroke-linecap="round"
+                                        :stroke-dasharray="2 * Math.PI * 42"
+                                        :stroke-dashoffset="ringOffset()"
+                                        class="transition-[stroke-dashoffset] duration-500"
+                                    />
+                                </svg>
+                                <span class="font-heading absolute inset-0 flex items-center justify-center text-base font-extrabold text-brand-navy">
+                                    {{ progressPercent() }}%
+                                </span>
+                            </div>
+                        </template>
                         <div class="flex flex-1 flex-col gap-1 text-sm text-[#5B6472]">
                             <span>{{ t('collected', locale()) }} <b class="block text-base text-[#101318]">{{ formatSom(props.case.allocated_minor, locale()) }}</b></span>
                             <span v-if="props.case.budget_minor !== null" class="text-xs">{{ t('goal', locale()) }} {{ formatSom(props.case.budget_minor, locale()) }}</span>

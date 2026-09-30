@@ -294,6 +294,7 @@ class CaseController extends Controller
             'allocated_minor' => $case->allocated_minor,
             'disbursed_minor' => $case->disbursed_minor,
             'allows_zakat' => $case->allows_zakat,
+            'progressTheme' => $case->progress_theme,
         ];
     }
 }
